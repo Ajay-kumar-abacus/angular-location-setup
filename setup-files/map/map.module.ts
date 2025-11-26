@@ -21,7 +21,7 @@ const mapRoutes = [
 ] 
 
 @NgModule({
-  declarations: [],
+  declarations: [MapComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(mapRoutes),
@@ -39,4 +39,5 @@ const mapRoutes = [
   ]
 })
 export class MapModule { }
+
 
