@@ -666,7 +666,7 @@ hourlyStats: any = {};
     // Update end marker position - FIXED VERSION
     const lastIndex = this.locationMarkers.length - 1;
     const endMarkerIcon = L.icon({
-      iconUrl: 'assets/img/person1.png',
+      iconUrl: 'assets/locationIcon/person1.png',
       iconSize: [45, 45],
       iconAnchor: [22, 22],
       popupAnchor: [0, -20]
@@ -679,7 +679,7 @@ hourlyStats: any = {};
         layer.options &&
         layer.options.icon &&
         layer.options.icon.options &&
-        layer.options.icon.options.iconUrl === 'assets/img/person1.png') {
+        layer.options.icon.options.iconUrl === 'assets/locationIcon/person1.png') {
         this.map.removeLayer(layer);
       }
     });
@@ -740,7 +740,7 @@ hourlyStats: any = {};
     // Create TrackPlayer instance
     this.trackPlayer = new L.TrackPlayer(this.trackPlayerPoints, {
       markerIcon: L.icon({
-        iconUrl: 'assets/img/person.png',
+        iconUrl: 'assets/locationIcon/person.png',
         iconSize: [45, 45],
         iconAnchor: [22, 22],
         popupAnchor: [0, -20]
@@ -1066,7 +1066,7 @@ private findTimelineDataForCheckin(checkin: any): any {
   private addStartPointLocationMarker(): void {
     console.log("line 678")
     const icon = L.icon({
-      iconUrl: 'assets/img/map-pin.png', // replace with your image path
+      iconUrl: 'assets/locationIcon/map-pin.png', // replace with your image path
       iconSize: [45, 45], // size of the icon
       iconAnchor: [22, 22], // point of the icon which will correspond to marker's location
       popupAnchor: [0, -20] // adjust popup position
@@ -1078,7 +1078,7 @@ private findTimelineDataForCheckin(checkin: any): any {
    private addHomeLocation(): void {
     console.log("line 678")
     const icon = L.icon({
-      iconUrl: 'assets/img/home-address.png', // replace with your image path
+      iconUrl: 'assets/locationIcon/home-address.png', // replace with your image path
       iconSize: [45, 45], // size of the icon
       iconAnchor: [22, 22], // point of the icon which will correspond to marker's location
       popupAnchor: [0, -20] // adjust popup position
@@ -1092,7 +1092,7 @@ private findTimelineDataForCheckin(checkin: any): any {
     const lastIndex = this.locationMarkers.length - 1;
     console.log("line 678")
     const icon = L.icon({
-      iconUrl: 'assets/img/person1.png', // replace with your image path
+      iconUrl: 'assets/locationIcon/person1.png', // replace with your image path
       iconSize: [45, 45], // size of the icon
       iconAnchor: [22, 22], // point of the icon which will correspond to marker's location
       popupAnchor: [0, -20] // adjust popup position
@@ -2800,3 +2800,4 @@ toggleFullScreen(isFullScreen: boolean): void {
   
 
 }
+
