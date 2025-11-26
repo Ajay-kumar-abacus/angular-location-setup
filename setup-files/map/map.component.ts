@@ -168,7 +168,7 @@ hourlyStats: any = {};
   playbackDateTime: any;
   total_distance: any;
   debugFlag: any = false;
-  summarizeData: any;
+  summarizeData: any ={};
   snapToRoad: boolean = false;
   end_point: any;
   start_point: any;
@@ -2798,4 +2798,5 @@ toggleFullScreen(isFullScreen: boolean): void {
 
 
   
+
 }
