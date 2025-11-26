@@ -1,0 +1,1299 @@
+<div class="main-container" style="overflow:overlay">
+  <div class="location-tracker-container">
+
+    <!-- Employee Info Card -->
+    <!-- Modern Employee Card Template -->
+    <div class="employee-card" *ngIf="!isLoading && !isSidebarVisible">
+      <div class="employee-header">
+        <div class="employee-avatar">
+          <i class="material-icons">person</i>
+        </div>
+
+        <div class="employee-details" *ngIf="employeeData">
+          <h3>{{ employeeData.name || 'Employee Name' }}</h3>
+          <p>
+            <span class="employee-meta-item">
+              <i class="material-icons" style="font-size: 14px;">badge</i>
+              {{ employeeData.employee_id || 'EMP001' }}
+            </span>
+            <span class="employee-meta-item">
+              <i class="material-icons" style="font-size: 14px;">phone</i>
+              {{ employeeData.contact_01 || '+91 XXXX XXX XXX' }}
+            </span>
+          </p>
+          <div class="user-selection">
+            <div class="dropdown-container">
+              <label for="dateSelect">Select Date</label>
+              <div class="header-actions">
+                <input type="date" id="dateSelect" [(ngModel)]="selectedDate" (change)="onDateChange()" [max]="maxDate"
+                  class="date-input-small">
+              </div>
+            </div>
+
+           <div class="dropdown-container">
+  <label for="userSearch">Select Employee</label>
+
+  <div class="custom-dropdown" (click)="showList()">
+    <!-- Search box inside dropdown -->
+    <input
+      type="text"
+      id="userSearch"
+      placeholder="Search employee..."
+      [(ngModel)]="searchTerm"
+      (input)="loadUsersList()"
+      class="user-search"
+    />
+
+    <!-- Dropdown list -->
+    <ul class="dropdown-list" *ngIf="userList?.length && userListing">
+      <li 
+        *ngFor="let user of userList"
+        (click)="selectUser(user)"
+        [class.selected]="selectedUserId === user.id"
+      >
+        {{ user.name }} - {{ user.employee_id }}
+      </li>
+    </ul>
+
+    <!-- Loading indicator -->
+    <div class="loading-spinner-small" *ngIf="isLoadingUsers"></div>
+  </div>
+</div>
+
+
+          </div>
+        </div>
+        <div class="kpi-grid" *ngIf="!isSidebarVisible && !isLoading && selectedUserId">
+
+
+
+          <div class="kpi-card">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">GPS Distance</span>
+                <span class="kpi-value">{{total_distance || 0}} KM</span>
+                <span class="kpi-subtitle">today</span>
+              </div>
+              <div class="kpi-icon kpi-icon-purple">
+                <i class="material-icons">route</i>
+              </div>
+            </div>
+          </div>
+            <div class="kpi-card clickable" (click)="showMeterDistance()">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">Meter Distance</span>
+                <span class="kpi-value">{{ getTotalDistance() }} KM</span>
+                <span class="kpi-subtitle clickable-subtitle">Click to view images</span>
+              </div>
+              <div class="kpi-icon kpi-icon-purple">
+                <i class="material-icons">route</i>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card clickable" (click)="showCheckinTimeline()">
+  <div class="kpi-content">
+    <div class="kpi-info">
+      <span class="kpi-label">Checkin Distance</span>
+      <span class="kpi-value">{{summaryTimelineCheckin?.total_direct_km || 0}} KM</span>
+      <span class="kpi-subtitle clickable-subtitle">Click to view timeline</span>
+    </div>
+    <div class="kpi-icon kpi-icon-purple">
+      <i class="material-icons">route</i>
+    </div>
+  </div>
+</div>
+
+          <div class="kpi-card">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">Active Time</span>
+                <span class="kpi-value">{{activeTime|| 0}}</span>
+                <span class="kpi-subtitle">today</span>
+              </div>
+              <div class="kpi-icon kpi-icon-purple">
+                <i class="material-icons">schedule</i>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">Battery</span>
+                <span class="kpi-value">{{summarizeData?.battery_level ? summarizeData.battery_level + '%' :
+                  '--'}}</span>
+                <span class="kpi-subtitle">across devices</span>
+              </div>
+             <div class="aurora-battery-section">
+              <div class="aurora-battery-visual">
+                <div class="aurora-battery-shell" [style.border-color]="getBatteryColor(summarizeData?.battery_level)">
+                  <div class="aurora-battery-core" 
+                       [style.height.%]="summarizeData?.battery_level"
+                       [style.background]="getBatteryColor(summarizeData?.battery_level)">                        
+                  </div>
+                 
+                  <div class="aurora-battery-tip" [style.background]="getBatteryColor(summarizeData?.battery_level)"></div>
+                </div>
+               
+              </div>
+            </div>
+            </div>
+          </div>
+           
+          <div class="kpi-card" (click)="showMissingPermissions()"
+            [style.cursor]="missingPermissionsCount > 0 ? 'pointer' : 'default'">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">Missing Permissions</span>
+                <span class="kpi-value">{{missingPermissionsCount}}</span>
+                <span class="kpi-subtitle " [ngClass]="missingPermissionsCount>0 ?'blinking-red':''">action
+                  needed</span>
+              </div>
+              <div class="kpi-icon kpi-icon-green">
+                <i class="material-icons">location_on</i>
+              </div>
+            </div>
+          </div>
+            <div class="kpi-card">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-label">Attendance Variation</span>
+                <span class="kpi-value">{{attendanceVariation|| 0}}</span>
+                <span class="kpi-subtitle">today</span>
+              </div>
+              <div class="kpi-icon kpi-icon-purple">
+                <i class="material-icons">schedule</i>
+              </div>
+            </div>
+          </div>
+
+          <ng-container *ngIf="showMoreKpis">
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">Total Calls (TC)</span>
+                  <span class="kpi-value">{{ TC || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-blue">
+                  <i class="material-icons">call</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">Productive Calls (PC)</span>
+                  <span class="kpi-value">{{ PC || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-green">
+                  <i class="material-icons">call_made</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">Secondary Sale</span>
+                  <span class="kpi-value">₹ {{ secondary_sale_amount || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-orange">
+                  <i class="material-icons">shopping_cart</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">New Counter TC</span>
+                  <span class="kpi-value">{{ New_counter_TC || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-teal">
+                  <i class="material-icons">add_call</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">New Counter PC</span>
+                  <span class="kpi-value">{{ New_counter_PC || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-lime">
+                  <i class="material-icons">add_shopping_cart</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">New counter Primary Value</span>
+                  <span class="kpi-value">₹ {{ counter_primary_Value || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-orange">
+                  <i class="material-icons">shopping_cart</i>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-content">
+                <div class="kpi-info">
+                  <span class="kpi-label">New counter Secondary Value</span>
+                  <span class="kpi-value">₹ {{ counter_secondary_Value || 0 }}</span>
+                  <span class="kpi-subtitle">today</span>
+                </div>
+                <div class="kpi-icon kpi-icon-orange">
+                  <i class="material-icons">shopping_cart</i>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <div class="kpi-card kpi-toggle-card" (click)="showMoreKpis = !showMoreKpis">
+            <div class="kpi-content">
+              <div class="kpi-info">
+                <span class="kpi-value">{{ showMoreKpis ? 'Show Less' : 'Show More' }}</span>
+              </div>
+              <div class="kpi-icon kpi-icon-blue">
+                <i class="material-icons">{{ showMoreKpis ? 'unfold_less' : 'unfold_more' }}</i>
+              </div>
+            </div>
+          </div>
+
+        
+        </div>
+
+        
+
+ 
+      </div>
+       <div class="header-info" *ngIf="isToday()">
+              <span *ngIf="summarizeData.device_model">{{ summarizeData.device_model }} ( {{
+                summarizeData.android_version }})</span>
+              <span *ngIf="summarizeData.created_at">Last updated: {{ summarizeData.created_at | date:'medium' }}</span>
+            </div>
+             <div class="header-info" *ngIf="!isToday()">
+              <span *ngIf="summarizeData.device_model">{{ summarizeData.device_model }} (Android {{
+                summarizeData.android_version }})</span>
+            </div>
+
+      <!-- Modern Control Section -->
+
+    </div>
+
+<!-- Checkin Timeline Alert Modal -->
+<!-- Checkin Timeline Side Panel -->
+<div class="checkin-timeline-overlay" *ngIf="showCheckinAlert" (click)="closeCheckinAlert()">
+  <div class="checkin-timeline-sidepanel" (click)="$event.stopPropagation()">
+    <div class="checkin-timeline-header">
+      <button class="checkin-timeline-close" (click)="closeCheckinAlert()" aria-label="Close timeline">
+        <i class="material-icons">close</i>
+      </button>
+      <h3 class="checkin-timeline-title">Check-in Journey Timeline</h3>
+    </div>
+
+    <div class="checkin-timeline-content">
+      <div class="checkin-summary-box">
+        <div class="checkin-summary-item">
+          <span class="summary-label">Total Distance</span>
+          <span class="summary-value">{{summaryTimelineCheckin?.total_route_km || 0}} KM</span>
+        </div>
+        <div class="checkin-summary-item">
+          <span class="summary-label">Shortest Distance</span>
+          <span class="summary-value">{{summaryTimelineCheckin?.total_direct_km || 0}} KM</span>
+        </div>
+         <!-- <div class="checkin-summary-item">
+          <span class="summary-label">Check-in to Check-out</span>
+          <span class="summary-value">{{summaryTimelineCheckin?.checkin_to_checkin_route_km || 0}} KM</span>
+        </div>
+         <div class="checkin-summary-item">
+          <span class="summary-label">Check-in to Check-Out Shortest</span>
+          <span class="summary-value">{{summaryTimelineCheckin?.checkin_to_checkin_direct_km || 0}} KM</span>
+        </div> -->
+        <!-- <div class="checkin-summary-item">
+          <span class="summary-label">Total Stops</span>
+          <span class="summary-value">{{summaryTimelineCheckin?.total_stops || 0}}</span>
+        </div> -->
+      </div>
+
+      <div class="checkin-timeline-list">
+        <div class="checkin-event-card" *ngFor="let event of timelineCheckin; let i = index">
+          <div class="checkin-event-sidebar">
+            <div class="checkin-event-number">{{event.sequence}}</div>
+            <div class="checkin-event-line" *ngIf="i < timelineCheckin?.length - 1"></div>
+          </div>
+          
+          <div class="checkin-event-content">
+            <div class="checkin-event-header">
+              <span class="checkin-event-type" [ngClass]="'type-' + event.type">
+                <i class="material-icons">
+                  {{event.type === 'attendance_start' ? 'play_circle' : 
+                    event.type === 'attendance_stop' ? 'stop_circle' : 
+                    event.type === 'checkin' ? 'where_to_vote' : 'place'}}
+                </i>
+                {{event.type === 'attendance_start' ? 'Day Start' : 
+                  event.type === 'attendance_stop' ? 'Day End' : 
+                  event.type === 'checkin' ? 'Check-in' : event.type}}
+              </span>
+              <!-- Show single time for non-checkin events -->
+              <span *ngIf="event.type !== 'checkin'" class="checkin-event-time">
+                {{event.datetime | date:'h:mm a'}}
+              </span>
+              <!-- Show start and end time for checkin events -->
+              <div *ngIf="event.type === 'checkin' && findCheckinById(event.details?.checkin_id) as checkinDetails">
+                <span class="checkin-event-time" style="font-size: 11px; display: block; text-align: right;">
+                  <strong>In:</strong> {{ checkinDetails.visit_start | date:'h:mm a' }}
+                </span>
+                <span *ngIf="checkinDetails.visit_end" class="checkin-event-time" style="font-size: 11px; display: block; text-align: right;">
+                  <strong>Out:</strong> {{ checkinDetails.visit_end | date:'h:mm a' }}
+                </span>
+                <ng-container *ngIf="checkinDetails.visit_end">
+                  <div class="checkin-event-duration">
+                    <i class="material-icons">timer</i>
+                    <span>{{ calculateDuration(checkinDetails.visit_start, checkinDetails.visit_end) != null ? calculateDuration(checkinDetails.visit_start, checkinDetails.visit_end) : '--' }}</span>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            
+            <div class="checkin-event-description">{{event.description}}</div>
+            
+            <div class="checkin-event-details" *ngIf="event.details">
+              <i class="material-icons">business</i>
+              <span>{{event.details.dr_name}}</span>
+            </div>
+            
+            <div class="checkin-event-location" *ngIf="event.location">
+              <i class="material-icons">location_on</i>
+              <span>{{event.location.address}}</span>
+            </div>
+            
+            <div class="checkin-event-distance" *ngIf="event.distance_from_previous">
+              <div class="distance-badge">
+                <i class="material-icons">straighten</i>
+                <span>{{event.distance_from_previous.km}} KM from last point</span>
+              </div>
+              <!-- <div class="cumulative-badge">
+                Total: {{event.cumulative_km}} KM
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Custom Alert Modal -->
+    <div class="alert-overlay" *ngIf="showAlert">
+      <div class="alert-container">
+        <div class="alert-header">
+          <div class="alert-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17.02.01 0" />
+            </svg>
+          </div>
+          <h3 class="alert-title">Tracking Accuracy Issues</h3>
+          <button class="alert-close" (click)="closeAlert()" aria-label="Close alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="alert-content">
+          <p class="alert-description">The following issues are affecting tracking accuracy and need attention:</p>
+
+          <div class="issues-list">
+            <div class="issue-item" *ngFor="let issue of missingPermissions">
+              <div class="issue-bullet"></div>
+              <span class="issue-text">{{ issue }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-actions">
+          <button class="btn-secondary" (click)="closeAlert()">Dismiss</button>
+          <button class="btn-primary" (click)="resolveIssues()">Resolve Issues</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing Permissions Disclaimer Modal -->
+    <div class="alert-overlay" *ngIf="showPermissionsDisclaimer">
+      <div class="alert-container">
+        <div class="alert-header" style="background-color: #ffc107;">
+          <div class="alert-icon" style="color: #212529;">
+            <svg width="24" height="24" viewBox="0 0 24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17.02.01 0" />
+            </svg>
+          </div>
+          <h3 class="alert-title" style="color: #212529;">Missing Permissions Disclaimer</h3>
+        </div>
+        <div class="alert-content">
+          <p class="alert-description">
+            Please note that routing and distance calculations may be affected due to missing permissions. Ensure all necessary permissions are granted for accurate tracking.
+          </p>
+        </div>
+        <div class="alert-actions">
+          <button class="btn-secondary" (click)="showPermissionsDisclaimer = false">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Android Version Warning Modal -->
+    <div class="alert-overlay" *ngIf="summarizeData?.android_version && +summarizeData.android_version <= 12">
+      <div class="alert-container">
+        <div class="alert-header" style="background-color: #ffc107;">
+          <div class="alert-icon" style="color: #212529;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17.02.01 0" />
+            </svg>
+          </div>
+          <h3 class="alert-title" style="color: #212529;">Android Version Disclaimer</h3>
+        </div>
+
+        <div class="alert-content">
+          <p class="alert-description">
+            This device is running <strong>Android {{summarizeData.android_version}}</strong>.
+            For Android versions 12 and below, Google may restrict background location access, which can affect live tracking accuracy.
+          </p>
+          <p>This is a limitation of the Android Operating System and not an issue with the application.</p>
+        </div>
+
+        <div class="alert-actions">
+          <button class="btn-secondary" (click)="summarizeData.android_version = null">Dismiss</button>
+        </div>
+      </div>
+    </div>
+      <!-- Custom Alert Modal -->
+    <div class="alert-overlay" *ngIf="showMeterAlert">
+      <div class="alert-container">
+        <div class="alert-header">
+          <div class="alert-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17.02.01 0" />
+            </svg>
+          </div>
+          <h3 class="alert-title">Meter Images</h3>
+          <button class="alert-close" (click)="closeMeterAlert()" aria-label="Close alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="alert-content">
+          <p class="alert-description">The following images are uploaded at the start and stop of Attendance:</p>
+          <div style="display: flex;">
+            
+                      <div class="img-container w200" *ngIf="attendanceData.start_meter_image != ''">
+                    <div (click)="goToImage(url + 'attendence/'+ attendanceData.start_meter_image)"
+                      class="image-block wp100">
+                      <img src="{{url+ 'attendence/'+ attendanceData.start_meter_image}}">
+                    </div>
+                    <div style="text-align: center;font-size: 20px;font-weight: 500;background: aliceblue;">{{attendanceData.start_meter_reading}}</div>
+                    <div style="text-align: center;font-size: 20px;font-weight: 500;background: aliceblue;">Start Meter</div>
+                  </div>
+                  <div class="img-container w200" *ngIf="attendanceData.stop_meter_image != ''">
+                    <div (click)="goToImage(url + 'attendence/'+ attendanceData.stop_meter_image)"
+                      class="image-block wp100">
+                      <img src="{{url+ 'attendence/'+ attendanceData.stop_meter_image}}"> 
+                    </div>
+                     <div style="text-align: center;font-size: 20px;font-weight: 500;background: aliceblue;">{{attendanceData.stop_meter_reading}}</div>
+                     <div style="text-align: center;font-size: 20px;font-weight: 500;background: aliceblue;">Stop Meter</div>
+                  </div>
+          </div>
+
+         
+        </div>
+
+        <div class="alert-actions">
+          <button class="btn-secondary" (click)="closeMeterAlert()">Dismiss</button>
+      
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+    <!-- Tab Navigation && locationMarkers.length > 0-->
+    <div class="tab-navigation-wrapper" *ngIf="!isLoading ">
+      <div class="tab-controls">
+        <div class="fullscreen-toggle">
+          <span class="toggle-label">Full Screen</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="isSidebarVisible">
+            <span class="slider"></span>
+          </label>
+        </div>
+       
+        <button class="refresh-btn" (click)="initializeData()">
+          <i class="material-icons">refresh</i>
+          Refresh
+        </button>
+
+
+      </div>
+      
+
+      <div class="tab-navigation">
+        <button class="tab-button" [class.active]="activeTab === 'liveusers'" (click)="switchTab('liveusers')" *ngIf="isToday()">
+          <i class="material-icons">group</i>
+          <span>Live Users</span>
+        </button>
+        
+        <!-- Show Live tab only for today's date -->
+        <button class="tab-button" [class.active]="activeTab === 'live'" (click)="switchTab('live')" *ngIf="isToday()">
+          <i class="material-icons">podcasts</i>
+          <span>Live Tracking</span>
+        </button>
+
+        <!-- Route tab (previously Live) -->
+        <button class="tab-button" [class.active]="activeTab === 'route'" (click)="switchTab('route')">
+          <i class="material-icons">route</i>
+          <span>Route</span>
+        </button>
+
+        <button class="tab-button" [class.active]="activeTab === 'playback'" (click)="switchTab('playback')">
+          <i class="material-icons">play_circle</i>
+          <span>Playback</span>
+        </button>
+
+        <button class="tab-button" [class.active]="activeTab === 'health'" (click)="switchTab('health')"
+          *ngIf="isToday()">
+          <i class="material-icons">healing</i>
+          <span>Device Health</span>
+        </button>
+        <button class="tab-button" [class.active]="activeTab === 'timeline'" (click)="switchTab('timeline')">
+          <i class="material-icons">timeline</i>
+          <span>Timeline</span>
+        </button>
+
+        <button class="tab-button" [class.active]="activeTab === 'permissions'" (click)="switchTab('permissions')">
+  <i class="material-icons">security</i>
+  <span>Missing Permissions</span>
+</button>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content-grid" *ngIf="!isLoading">
+
+
+      <!-- Main Map Area -->
+      <main class="map-section"
+        *ngIf="activeTab !== 'permissions' && activeTab !== 'timeline' && activeTab !== 'battery' && activeTab !== 'summary' && activeTab !== 'health' && activeTab !== 'liveusers'">
+        <div class="map-container">
+          <div id="trackingMap" class="tracking-map" *ngIf="locationMarkers.length > 0"></div>
+
+          <!-- Map Controls Overlay -->
+          <div class="map-controls" style="z-index: 400;" *ngIf="oldFlag!=true">
+            <!-- <button class="map-control-btn">
+              <i class="material-icons">my_location</i>
+            </button>
+            <button class="map-control-btn">
+              <i class="material-icons">zoom_in</i>
+            </button>
+            <button class="map-control-btn">
+              <i class="material-icons">zoom_out</i>
+            </button>
+            <button class="map-control-btn">
+              <i class="material-icons">layers</i>
+            </button> -->
+            <div class="fullscreen-toggle snapToRoad" *ngIf="!isToday()">
+              <span class="toggle-label" style="font-size:20px;font-weight:700;">Snap To Road</span>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="snapToRoad" (change)="toggleRoadChange()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <!-- Wrap your existing snippet with the class below -->
+            <div class="map-info-card" *ngIf="isSidebarVisible">
+              <div class="map-info-name">{{employeeData.name}}</div>
+              <div class="map-info-date">{{selectedDate}}</div>
+            </div>
+
+          </div>
+
+          <!-- Playback Controls -->
+          <div class="playback-controls" style="z-index: 400;" *ngIf="activeTab === 'playback' && !isMapLoading">
+            <div class="playback-left">
+              <button class="control-btn play-btn" *ngIf="playbackStatus === 'paused' || playbackStatus === 'stopped'"
+                (click)="startPlayback()">
+                <i class="material-icons">play_arrow</i>
+              </button>
+              <button class="control-btn pause-btn" *ngIf="playbackStatus === 'playing'" (click)="pausePlayback()">
+                <i class="material-icons">pause</i>
+              </button>
+
+              <div class="playback-info">
+                <span class="playback-time">{{playbackDateTime}}</span>
+                <span class="playback-status">{{playbackStatus}}</span>
+              </div>
+            </div>
+
+            <div class="progress-section">
+              <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" (input)="updateProgress($event)"
+                class="progress-slider">
+            </div>
+
+            <div class="playback-right">
+              <div class="speed-controls">
+                <button class="speed-btn" (click)="toggleSpeedControl()">
+                  <i class="material-icons">speed</i>
+                  <span>{{ playbackDelay/1000 }}x</span>
+                </button>
+
+                <div class="speed-dropdown" *ngIf="showSpeedControl">
+                  <input type="range" min="300" max="5000" step="100" [ngModel]="playbackDelay"
+                    (change)="updateSpeed($event)" class="speed-slider">
+                  <div class="speed-labels">
+                    <span>0.3x</span>
+                    <span>5x</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Loading Overlay -->
+          <div class="loading-overlay" *ngIf="isMapLoading">
+            <!-- <div class="loading-spinner"></div> -->
+            <img style="height: 30%;" src="assets/img/finder.gif" />
+            <p>Loading map data...</p>
+          </div>
+          <div class="loading-overlay" *ngIf="locationMarkers.length==0 && !isMapLoading">
+            <img style="height: 80%;" src="assets/img/noData.ico" />
+            <p>No Data Found</p>
+          </div>
+        </div>
+      </main>
+
+      <!-- Battery Analytics -->
+      <section class="analytics-section" *ngIf="activeTab === 'battery'" style="width:100%">
+        <div class="analytics-card">
+          <div class="card-header">
+            <h3>Battery Consumption Analytics</h3>
+            <div class="header-actions">
+              <button class="action-btn">
+                <i class="material-icons">download</i>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div id="analyticsChart" class="chart-wrapper">
+              <a class="zc-ref" href="https://www.zingchart.com/">Powered by ZingChart</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary Table -->
+      <section class="summary-section" *ngIf="activeTab === 'summary'">
+        <div class="summary-card">
+          <div class="card-header">
+            <h3>Attendance Summary</h3>
+            <div class="header-actions">
+              <input type="date" [(ngModel)]="selectedDate" (change)="loadAttendanceSummary()" [max]="maxDate"
+                class="date-input-small">
+              <button class="action-btn">
+                <i class="material-icons">download</i>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Activity Type</th>
+                  <th>Check-in Time</th>
+                  <th>Check-out Time</th>
+                  <th>Location</th>
+                  <th>Customer Info</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let record of attendanceSummary; let i = index">
+                  <td>{{i + 1}}</td>
+                  <td>
+                    <span class="activity-badge">{{record.type}}</span>
+                  </td>
+                  <td>{{getCheckinTime(record) | date:'h:mm a'}}</td>
+                  <td>{{getCheckoutTime(record) | date:'h:mm a'}}</td>
+                  <td class="location-cell">{{record.address || '--'}}</td>
+                  <td>
+                    <div class="customer-info">
+                      <strong>{{record.dr_name}}</strong>
+                      <span class="customer-type">({{record.dr_type_name || '--'}})</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="table-action-btn">
+                      <i class="material-icons">visibility</i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="no-data-state" *ngIf="attendanceSummary.length === 0">
+              <i class="material-icons">event_busy</i>
+              <p>No attendance data available for selected date</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Device Health Section -->
+      <section class="device-health-section" *ngIf="activeTab === 'health' && summarizeData">
+        <div class="device-health-card">
+          <div class="card-header">
+            <h3>Device Health Status</h3>
+            <div class="header-info">
+              <span *ngIf="summarizeData.device_model">{{ summarizeData.device_model }} (Android {{
+                summarizeData.android_version }})</span>
+              <span *ngIf="summarizeData.created_at">Last updated: {{ summarizeData.created_at | date:'medium' }}</span>
+            </div>
+          </div>
+
+          <div class="health-content-grid">
+            <!-- Health Score -->
+            <div class="health-score-container">
+              <h4>Health Score</h4>
+              <div class="health-score-circle" [ngClass]="getHealthScoreClass(summarizeData.health_score)">
+                <span class="score">{{ summarizeData.health_score || 'N/A' }}%</span>
+              </div>
+              <p>A measure of device configuration for optimal tracking.</p>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="key-metrics-container">
+              <h4>Key Metrics</h4>
+              <div class="metrics-grid">
+                <!-- State -->
+                <div class="metric-item">
+                  <i class="material-icons">battery_std</i>
+                  <span class="metric-label">Battery Level</span>
+                  <span class="metric-value">{{ summarizeData.battery_level }}%</span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">wifi</i>
+                  <span class="metric-label">Internet</span>
+                  <span class="metric-value"
+                    [class.ok]="summarizeData.internet_type && summarizeData.internet_type !== 'None' && summarizeData.internet_type !== ''"
+                    [class.issue]="!summarizeData.internet_type || summarizeData.internet_type === 'None' || summarizeData.internet_type === ''">
+                    {{ summarizeData.internet_type || 'None' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">track_changes</i>
+                  <span class="metric-label">Location Accuracy</span>
+                  <span class="metric-value">{{ summarizeData.location_accuracy }}m</span>
+                </div>
+
+                <!-- Settings -->
+                <div class="metric-item">
+                  <i class="material-icons">location_on</i>
+                  <span class="metric-label">Location Services</span>
+                  <span class="metric-value" [class.ok]="summarizeData.is_location_enabled == '1'"
+                    [class.issue]="summarizeData.is_location_enabled != '1'">
+                    {{ summarizeData.is_location_enabled == '1' ? 'On' : 'Off' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">gps_fixed</i>
+                  <span class="metric-label">GPS Provider</span>
+                  <span class="metric-value" [class.ok]="summarizeData.is_gps_enabled == '1'"
+                    [class.issue]="summarizeData.is_gps_enabled != '1'">
+                    {{ summarizeData.is_gps_enabled == '1' ? 'Enabled' : 'Disabled' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">network_cell</i>
+                  <span class="metric-label">Network Provider</span>
+                  <span class="metric-value" [class.ok]="summarizeData.is_network_location_enabled == '1'"
+                    [class.issue]="summarizeData.is_network_location_enabled != '1'">
+                    {{ summarizeData.is_network_location_enabled == '1' ? 'Enabled' : 'Disabled' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">battery_saver</i>
+                  <span class="metric-label">Battery Optimization</span>
+                  <span class="metric-value" [class.ok]="summarizeData.is_battery_optimized == '0'"
+                    [class.issue]="summarizeData.is_battery_optimized != '0'">
+                    {{ summarizeData.is_battery_optimized == '0' ? 'Off' : 'On' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">power_settings_new</i>
+                  <span class="metric-label">Power Saving Mode</span>
+                  <span class="metric-value" [class.ok]="summarizeData.is_power_save_mode == '0'"
+                    [class.issue]="summarizeData.is_power_save_mode != '0'">
+                    {{ summarizeData.is_power_save_mode == '0' ? 'Off' : 'On' }}
+                  </span>
+                </div>
+
+                <!-- Permissions -->
+                <div class="metric-item">
+                  <i class="material-icons">my_location</i>
+                  <span class="metric-label">Fine Location</span>
+                  <span class="metric-value" [class.ok]="summarizeData.fine_location == '1'"
+                    [class.issue]="summarizeData.fine_location != '1'">
+                    {{ summarizeData.fine_location == '1' ? 'Granted' : 'Denied' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">location_searching</i>
+                  <span class="metric-label">Coarse Location</span>
+                  <span class="metric-value" [class.ok]="summarizeData.coarse_location == '1'"
+                    [class.issue]="summarizeData.coarse_location != '1'">
+                    {{ summarizeData.coarse_location == '1' ? 'Granted' : 'Denied' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">security</i>
+                  <span class="metric-label">Background Location</span>
+                  <span class="metric-value" [class.ok]="summarizeData.has_background_permission == '1'"
+                    [class.issue]="summarizeData.has_background_permission != '1'">
+                    {{ summarizeData.has_background_permission == '1' ? 'Granted' : 'Denied' }}
+                  </span>
+                </div>
+                <div class="metric-item">
+                  <i class="material-icons">history_toggle_off</i>
+                  <span class="metric-label">Background Tracking</span>
+                  <span class="metric-value" [class.ok]="summarizeData.can_track_background == '1'"
+                    [class.issue]="summarizeData.can_track_background != '1'">
+                    {{ summarizeData.can_track_background == '1' ? 'Allowed' : 'Blocked' }}
+                  </span>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+
+          <div class="issues-recommendations-grid">
+            <!-- Device Issues -->
+            <!-- <div class="list-container issues">
+              <div class="list-header">
+                <i class="material-icons">warning</i>
+                <h4>Detected Issues</h4>
+              </div>
+              <ul>
+                <li *ngFor="let issue of summarizeData.device_issues_array">{{ formatIssueText(issue) }}</li>
+                <li *ngIf="!summarizeData.device_issues_array || summarizeData.device_issues_array.length === 0">No
+                  issues detected.</li>
+              </ul>
+            </div> -->
+
+            <!-- Recommendations -->
+            <!-- <div class="list-container recommendations">
+              <div class="list-header">
+                <i class="material-icons">lightbulb</i>
+                <h4>Recommendations</h4>
+              </div>
+              <ul>
+                <li *ngFor="let rec of summarizeData.recommendations_array">{{ rec }}</li>
+                <li *ngIf="!summarizeData.recommendations_array || summarizeData.recommendations_array.length === 0">
+                  Device is optimally configured.</li>
+              </ul>
+            </div> -->
+          </div>
+        </div>
+      </section>
+      <section class="device-health-section" *ngIf="activeTab === 'health' && !summarizeData">
+        <div class="no-data-state" style="padding-top: 50px; text-align: center;">
+          <i class="material-icons" style="font-size: 48px;">healing</i>
+          <p>No device health data available for the selected user or date.</p>
+        </div>
+      </section>
+
+      <!-- Live Users Tracking Section -->
+      <section class="live-users-section" *ngIf="activeTab === 'liveusers'">
+        <div class="live-users-container">
+          <div class="live-users-sidebar" [class.collapsed]="!showUsersList">
+            <div class="sidebar-header">
+              <h3>Active Users</h3>
+              <div class="toggle-sidebar-btn">
+            
+                <strong style="background: aliceblue;padding:10px;
+                border-radius:10px;">{{liveUsersData.length}}</strong>
+              
+            </div> 
+            </div> 
+            
+
+            <div class="users-list" *ngIf="showUsersList">
+              <div class="user-card" *ngFor="let user of liveUsersData"
+                [class.selected]="selectedLiveUsers.has(user.user.id.toString())"
+                (click)="toggleUserSelection(user.user.id.toString())">
+                <div class="user-avatar">
+                  <i class="material-icons">person</i>
+                  <span class="status-indicator" [class.active]="user.movement.is_moving"></span>
+                </div>
+                <div class="user-details">
+                  <h4>{{user.user.name || 'Unknown'}}</h4>
+                  <p class="user-id">ID: {{user.user.employee_id || 'N/A'}}</p>
+                  <div class="user-stats">
+                    <span class="stat-item">
+                      <i class="material-icons">battery_std</i>
+                      {{user.device.battery_level}}%
+                    </span>
+                   
+                  </div>
+                  <div class="user-activity">
+                    <span class="activity-badge" [class]="user.movement.activity">
+                      {{user.movement.activity || 'unknown'}}
+                    </span>
+                  </div>
+                
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="sidebar-summary" *ngIf="showUsersList">
+              <div class="summary-item">
+                <span>Total Users:</span>
+                <strong>{{liveUsersData.length}}</strong>
+              </div>
+              <div class="summary-item">
+                <span>Active:</span>
+                <strong>{{getActiveUsersCount()}}</strong>
+              </div>
+              <div class="summary-item">
+                <span>Selected:</span>
+                <strong>{{selectedLiveUsers.size}}</strong>
+              </div>
+            </div> -->
+          </div>
+
+          <div class="live-users-map-container">
+            <div id="liveUsersMap" class="live-users-map"></div>
+
+            <!-- Map Controls -->
+            <div class="live-map-controls-btn">
+             
+              <button class="control-btn-live" (click)="refreshLiveUsers()">
+                <i class="material-icons">refresh</i>
+                Refresh
+              </button>
+             
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-overlay" *ngIf="isLoadingLiveUsers">
+              <div class="loading-spinner"></div>
+              <p>Loading live users data...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div *ngIf="activeTab === 'testing'" class="testing-tab-content">
+        <div class="polyline-input-container">
+          <h3>Plot Encoded Polyline</h3>
+          <textarea [(ngModel)]="testPolyline" placeholder="Enter encoded polyline here" rows="6"></textarea>
+          <button class="plot-button" (click)="plotTestPolyline()">Plot Polyline</button>
+        </div>
+        <div id="testMapContainer" style="height: 600px; width: 100%; border-radius: 8px; margin-top: 16px;"></div>
+      </div>
+      
+      
+      <!-- Timeline Section -->
+      <section class="timeline-section" *ngIf="activeTab === 'timeline'">
+        <div class="timeline-container" *ngIf="timelineEvents.length > 0">
+          <div class="timeline-header">
+            <h2>Daily Activity Timeline</h2>
+            <div class="timeline-stats">
+              <span class="stat-item">
+                <i class="material-icons">event</i>
+                {{timelineEvents.length}} Events
+              </span>
+             
+              <span class="stat-item">
+                <i class="material-icons">timer</i>
+                {{timelineData.analytics?.total_travel_time || 0}} mins
+              </span>
+            </div>
+            <!-- Map Toggle Button -->
+            <button class="map-toggle-btn" (click)="toggleTimelineMap()" [class.active]="showTimelineMap">
+              <i class="material-icons">{{showTimelineMap ? 'map' : 'view_list'}}</i>
+              {{showTimelineMap ? 'Hide Map' : 'Show Map'}}
+            </button>
+          </div>
+
+          <div class="timeline-content" [class.with-map]="showTimelineMap">
+            <!-- Map View (conditionally shown) -->
+            <div class="timeline-map-panel" *ngIf="showTimelineMap">
+              <div id="timelineMapView" class="timeline-map-view"></div>
+            </div>
+
+            <!-- Timeline List (hidden when map is shown) -->
+            <div class="timeline-track" *ngIf="!showTimelineMap">
+              <div class="timeline-event" *ngFor="let event of timelineEvents; let i = index">
+                <div class="timeline-time">{{event.time}}</div>
+
+                <div class="timeline-marker" [ngClass]="getTimelineEventClass(event.type)">
+                  <i class="material-icons">{{getTimelineIcon(event.type)}}</i>
+                </div>
+
+                <div class="timeline-card" [ngClass]="getTimelineEventClass(event.type)">
+                  <h4>{{ event.type === 'visit' ? event.visit_count + ' . Visit : ' + event.title : event.title }}</h4>
+                  <p class="event-description">{{event.description}}</p>
+                  <!-- Enhanced Order Amount Display -->
+                  <div *ngIf="event.order_amount > 0" class="event-order-amount">
+                    <i class="material-icons">shopping_cart</i>
+                    <span>Order Amount: {{ event.order_amount | currency:'INR':'symbol':'1.2-2' }}</span>
+                  </div>
+
+                  <div class="event-details" *ngIf="event.type === 'travel'">
+                    <span><i class="material-icons">schedule</i> {{event.duration_minutes}} mins</span>
+                    <span><i class="material-icons">speed</i> {{event.avg_speed_kmh}} km/h</span>
+                  </div>
+
+                  <div class="event-location" *ngIf="event.location">
+                    <i class="material-icons">location_on</i>
+                    <span>{{event.location.address || 'Location'}}</span>
+                  </div>
+                </div>
+
+                <div class="timeline-gap" *ngIf="hasTimelineGap(i)">
+                  <div class="gap-indicator">
+                    <i class="material-icons">warning</i>
+                    <span>Gap: {{getGapDuration(i)}} mins</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeline Insights Panel -->
+            <!-- <div class="timeline-insights-panel" *ngIf="!showTimelineMap && timelineInsights">
+              <div class="list-container summary" *ngIf="timelineInsights.summary?.length > 0">
+                <div class="list-header">
+                  <i class="material-icons">summarize</i>
+                  <h4>Summary</h4>
+                </div>
+                <ul>
+                  <li *ngFor="let item of timelineInsights.summary">{{ item }}</li>
+                </ul>
+              </div>
+
+              <div class="list-container recommendations" *ngIf="timelineInsights.recommendations?.length > 0">
+                <div class="list-header">
+                  <i class="material-icons">lightbulb</i>
+                  <h4>Recommendations</h4>
+                </div>
+                <ul>
+                  <li *ngFor="let item of timelineInsights.recommendations">{{ item }}</li>
+                </ul>
+              </div>
+
+              <div class="list-container patterns" *ngIf="timelineInsights.patterns?.length > 0">
+                <div class="list-header">
+                  <i class="material-icons">insights</i>
+                  <h4>Patterns</h4>
+                </div>
+                <ul>
+                  <li *ngFor="let item of timelineInsights.patterns">{{ item }}</li>
+                </ul>
+              </div>
+            </div> -->
+
+          </div>
+        </div>
+         <div class="timeline-container map-container" *ngIf="timelineEvents.length <=0">
+      <div class="loading-overlay">
+            <img style="height: 80%;" src="assets/img/noData.ico" />
+            <p>No Data Found</p>
+          </div>
+         </div>
+      </section>
+
+
+      <!-- Permissions Report Section -->
+<section class="permissions-section" *ngIf="activeTab === 'permissions'">
+  <div class="permissions-container">
+    <div class="permissions-header">
+      <h2>Missing Device Permissions Report</h2>
+
+      <div style="display: flex;gap: 10px;">
+        <button class="action-btn" (click)="downloadPermissionsReport()">
+         
+                <i class="material-icons">download</i>
+                Export
+              </button>
+           
+      <div class="date-info">
+        <span>{{selectedDate | date:'fullDate'}}</span>
+      </div>
+      </div>
+      
+              
+    </div>    <div class="permissions-layout" *ngIf="permissionsList.length > 0">
+      <!-- Android Version Warning -->
+      <div class="alert-container" *ngIf="summarizeData?.android_version && +summarizeData.android_version <= 12" style="margin-bottom: 1rem; border: 1px solid #ffc107; border-radius: 8px;">
+        <div class="alert-header" style="background-color: #ffc107; border-top-left-radius: 7px; border-top-right-radius: 7px;">
+          <div class="alert-icon" style="color: #212529;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17.02.01 0" />
+            </svg>
+          </div>
+          <h3 class="alert-title" style="color: #212529;">Android Version Disclaimer</h3>
+        </div>
+        <div class="alert-content">
+          <p class="alert-description">
+            This device is running <strong>Android {{summarizeData.android_version}}</strong>. For Android versions 12 and below, Google may restrict background location access, which can affect live tracking accuracy. This is a limitation of the Android Operating System and not an issue with the application.
+          </p>
+        </div>
+      </div>
+
+      <!-- Modern Hourly Timeline Sidebar -->
+      <div class="hourly-sidebar">
+        <h3>Hourly Timeline</h3>
+        <div class="hours-list">
+          <div class="hour-item" 
+               *ngFor="let hour of getHoursList()"
+               [class.active]="selectedHour === hour"
+               (click)="selectHour(hour)">
+            
+            <div class="hour-header">
+              <span class="hour-time">{{hour}}</span>
+              <span class="hour-count">{{getHourlyStatuses(hour).total}}</span>
+            </div>
+            
+            <div class="hour-battery">
+              <i class="material-icons" [style.color]="getBatteryColor(getHourlyStatuses(hour).avgBattery)">
+                {{getBatteryIcon(getHourlyStatuses(hour).avgBattery)}}
+              </i>
+              <span class="battery-level">{{getHourlyStatuses(hour).avgBattery}}%</span>
+            </div>
+            
+            <div class="hour-issues">
+              <span class="issues-count" [class.critical]="getHourlyStatuses(hour).criticalIssues > 0">
+                {{getHourlyStatuses(hour).totalIssues}} issues
+              </span>
+             
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modern Details Panel -->
+      <div class="permissions-details">
+        <div class="details-header">
+          <h3>Device Status at {{selectedHour}}</h3>
+          <div class="hour-summary">
+            <div class="summary-badge total">
+              <i class="material-icons">assessment</i>
+              <span>{{getHourlyStatuses(selectedHour).total}} Records</span>
+            </div>
+            <div class="summary-badge" 
+                 [ngClass]="getHourlyStatuses(selectedHour).batteryStatus">
+              <i class="material-icons">{{getBatteryIcon(getHourlyStatuses(selectedHour).avgBattery)}}</i>
+              <span>{{getHourlyStatuses(selectedHour).avgBattery}}% Battery</span>
+            </div>
+            <div class="summary-badge issues" 
+                 [class.critical]="getHourlyStatuses(selectedHour).criticalIssues > 0">
+              <i class="material-icons">{{getHourlyStatuses(selectedHour).criticalIssues > 0 ? 'error' : 'check_circle'}}</i>
+              <span>{{getHourlyStatuses(selectedHour).totalIssues}} Issues</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="issues-timeline">
+          <div class="issue-record" 
+               *ngFor="let record of getSelectedHourPermissions(); let i = index"
+               [class.critical]="isCritical(record)">
+            
+            <div class="record-time">
+              <span class="time">{{record.timestamp | date:'HH:mm:ss'}}</span>
+            </div>
+            
+            <div class="record-battery">
+              <div class="battery-info">
+                <i class="material-icons" [style.color]="getBatteryColor(record.battery_level)">
+                  {{getBatteryIcon(record.battery_level)}}
+                </i>
+                <span class="battery-text" [style.color]="getBatteryColor(record.battery_level)">
+                  {{record.battery_level}}%
+                </span>
+              </div>
+            </div>
+            
+            <div class="record-issues">
+              <div class="issues-container" *ngIf="record.issues && record.issues.length > 0; else noIssues">
+                <div class="issue-chip red" *ngFor="let issue of record.issues" >
+                  <i class="material-icons">{{getIssueIcon(issue)}}</i>
+                  <span>{{formatIssueText(issue)}}</span>
+                </div>
+              </div>
+              
+              <ng-template #noIssues>
+                <div class="no-issues">
+                  <i class="material-icons good">check_circle</i>
+                  <span>No Issues Detected</span>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
+        <!-- No data for selected hour -->
+        <div class="no-hour-data" *ngIf="getSelectedHourPermissions().length === 0">
+          <i class="material-icons">schedule</i>
+          <p>No device status recorded at {{selectedHour}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modern No data state -->
+    <div class="no-permissions-data" *ngIf="permissionsList.length === 0">
+      <i class="material-icons">devices_other</i>
+      <h3>No Device Data Available</h3>
+      <p>No device status information found for the selected date and user. Please check your filters or try a different date range.</p>
+    </div>
+  </div>
+</section>
+
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-skeleton" *ngIf="isLoading">
+      <div class="skeleton-header"></div>
+      <div class="skeleton-kpis"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-sidebar"></div>
+        <div class="skeleton-main"></div>
+      </div>
+    </div>
+  </div>
+</div>
