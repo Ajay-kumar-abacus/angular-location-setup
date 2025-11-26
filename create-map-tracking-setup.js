@@ -113,7 +113,7 @@ function download(url, dest) {
 // -----------------------------------------------------------
 console.log("\n➡ Updating attendance.component.html...");
 
-const attendancePath = "src/app/attendance/attendance.component.html";
+const attendancePath = "src/app/attendence/attendence.component.html";
 
 if (fs.existsSync(attendancePath)) {
     let attendanceHtml = fs.readFileSync(attendancePath, "utf8");
@@ -134,8 +134,10 @@ if (fs.existsSync(attendancePath)) {
 }
 
 
-  console.log("\n============================================");
-  console.log("    🎉 MAP SETUP COMPLETE!");
-  console.log("============================================\n");
+console.log("===============================================");
+  console.log(" 🎉 ANGULAR MAP-TRACKING SETUP COMPLETE 🎉");
+  console.log(" 🚀 Developed by GENUINE AJAY 🚀");
+  console.log("===============================================");
+ 
 
 })();
