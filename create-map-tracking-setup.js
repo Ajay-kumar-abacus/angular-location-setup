@@ -117,7 +117,7 @@ const attendanceFile = "src/app/attendence/attendence.component.html";
 
 if (fs.existsSync(attendanceFile)) {
   let attendanceContent = fs.readFileSync(attendanceFile, "utf8");
-  const updatedAttendance = attendanceContent.replace(/tracker\//g, "/map-tracking");
+  const updatedAttendance = attendanceContent.replace(/tracker\//g, "/map");
   fs.writeFileSync(attendanceFile, updatedAttendance);
   console.log("✔ tracker/ replaced with map-tracking/");
 } else {
