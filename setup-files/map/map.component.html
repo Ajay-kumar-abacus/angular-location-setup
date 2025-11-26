@@ -682,11 +682,11 @@
           <!-- Loading Overlay -->
           <div class="loading-overlay" *ngIf="isMapLoading">
             <!-- <div class="loading-spinner"></div> -->
-            <img style="height: 30%;" src="assets/img/finder.gif" />
+            <img style="height: 30%;" src="assets/locationIcon/finder.gif" />
             <p>Loading map data...</p>
           </div>
           <div class="loading-overlay" *ngIf="locationMarkers.length==0 && !isMapLoading">
-            <img style="height: 80%;" src="assets/img/noData.ico" />
+            <img style="height: 80%;" src="assets/locationIcon/noData.ico" />
             <p>No Data Found</p>
           </div>
         </div>
@@ -1130,7 +1130,7 @@
         </div>
          <div class="timeline-container map-container" *ngIf="timelineEvents.length <=0">
       <div class="loading-overlay">
-            <img style="height: 80%;" src="assets/img/noData.ico" />
+            <img style="height: 80%;" src="assets/locationIcon/noData.ico" />
             <p>No Data Found</p>
           </div>
          </div>
@@ -1296,4 +1296,5 @@
       </div>
     </div>
   </div>
+
 </div>
