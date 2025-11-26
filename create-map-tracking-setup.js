@@ -156,6 +156,52 @@ if (!currentStyles.includes("body.fullscreen-map")) {
   console.log("✔ Fullscreen CSS already exists");
 }
 
+   console.log("\n➡ Downloading locationIcon folder...");
+
+  const ICON_DEST = "src/assets/locationIcon";
+
+// CREATE DIRECTORY
+  if (!fs.existsSync(ICON_DEST)) {
+    fs.mkdirSync(ICON_DEST, { recursive: true });
+  }
+
+  const ICON_BASE =
+    "https://raw.githubusercontent.com/Ajay-kumar-abacus/angular-location-setup/main/locationIcon";
+
+  const iconFiles = [
+    "finder.gif",
+    "home-address.png",
+    "location.png",
+    "map-pin.png",
+    "noData.ico",
+    "person.png",
+    "person1.png"
+  ];
+
+  for (const icon of iconFiles) {
+    await new Promise((resolve) => {
+      https.get(`${ICON_BASE}/${icon}`, (res) => {
+        if (res.statusCode !== 200) {
+          console.log("❌ Failed:", icon);
+          resolve();
+          return;
+        }
+
+        const filePath = `${ICON_DEST}/${icon}`;
+        const fileStream = fs.createWriteStream(filePath);
+
+        res.pipe(fileStream);
+        fileStream.on("finish", () => {
+          fileStream.close();
+          console.log("✔ Downloaded:", filePath);
+          resolve();
+        });
+      });
+    });
+  }
+
+ 
+
 console.log("===============================================");
   console.log(" 🎉 ANGULAR MAP-TRACKING SETUP COMPLETE 🎉");
   console.log(" 🚀 Developed by GENUINE AJAY 🚀");
