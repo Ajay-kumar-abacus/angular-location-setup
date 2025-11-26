@@ -108,31 +108,53 @@ function download(url, dest) {
     console.log("✔ Route added");
   }
 
-  // -----------------------------------------------------------
-// 🔄  Replace tracking links inside attendance.component.html
+// -----------------------------------------------------------
+// 8️⃣ REPLACE 'tracker/' WITH 'map-tracking/' IN attendance.component.html
 // -----------------------------------------------------------
 console.log("\n➡ Updating attendance.component.html...");
 
-const attendancePath = "src/app/attendence/attendence.component.html";
+const attendanceFile = "src/app/attendence/attendence.component.html";
 
-if (fs.existsSync(attendancePath)) {
-    let attendanceHtml = fs.readFileSync(attendancePath, "utf8");
-
-    // Replace ANY /tracking... with /map
-    const updatedHtml = attendanceHtml
-        .replace(/routerLink="\/tracking[^"]*"/g, 'routerLink="/map"')
-        .replace(/routerLink='\/tracking[^']*'/g, "routerLink='/map'")
-        .replace(/['"]\/tracking[^'"]*['"]/g, '"\/map"')
-        .replace(/tracking\//g, "map/")
-        .replace(/tracker\//g, "map/");
-
-    fs.writeFileSync(attendancePath, updatedHtml, "utf8");
-
-    console.log("✔ Replaced tracking links with /map in attendance.component.html");
+if (fs.existsSync(attendanceFile)) {
+  let attendanceContent = fs.readFileSync(attendanceFile, "utf8");
+  const updatedAttendance = attendanceContent.replace(/tracker\//g, "/map-tracking");
+  fs.writeFileSync(attendanceFile, updatedAttendance);
+  console.log("✔ tracker/ replaced with map-tracking/");
 } else {
-    console.log("⚠ attendance.component.html not found");
+  console.log("⚠ attendance.component.html not found");
 }
 
+
+// -----------------------------------------------------------
+// 9️⃣ ADD FULLSCREEN CSS TO styles.scss
+// -----------------------------------------------------------
+console.log("\n➡ Adding fullscreen-map CSS to styles.scss...");
+
+const stylesPath = "src/styles.scss";
+let currentStyles = fs.readFileSync(stylesPath, "utf8");
+
+const fullScreenCSS = `
+body.fullscreen-map {
+    .main-container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        padding: 15px !important;
+        z-index: 10000 !important;
+        height: 100% !important;
+        width: 100vw !important;
+    }
+}
+`;
+
+if (!currentStyles.includes("body.fullscreen-map")) {
+  fs.writeFileSync(stylesPath, fullScreenCSS + "\n" + currentStyles);
+  console.log("✔ Fullscreen CSS added to styles.scss");
+} else {
+  console.log("✔ Fullscreen CSS already exists");
+}
 
 console.log("===============================================");
   console.log(" 🎉 ANGULAR MAP-TRACKING SETUP COMPLETE 🎉");
