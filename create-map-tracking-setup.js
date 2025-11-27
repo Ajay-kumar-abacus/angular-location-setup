@@ -202,10 +202,28 @@ if (!currentStyles.includes("body.fullscreen-map")) {
 
  
 
-console.log("===============================================");
-  console.log(" 🎉 ANGULAR MAP-TRACKING SETUP COMPLETE 🎉");
-  console.log(" 🚀 Developed by GENUINE AJAY 🚀");
-  console.log("===============================================");
+console.log(
+  "%c=======================================================",
+  "color: #007acc; font-weight: bold;"
+);
+console.log(
+  "%c 🗺️ ✨ ANGULAR MAP-TRACKING INITIALIZED ✨ 🗺️",
+  "color: #e63946; font-size: 16px; font-weight: bold; background-color: #f1faee; padding: 5px 10px; border-radius: 5px;"
+);
+console.log(
+  "%c 🚀 Developed by %cGENUINE AJAY%c 🚀",
+  "color: #457b9d;",
+  "color: #1d3557; font-weight: bold; text-decoration: underline;",
+  "color: #457b9d;"
+);
+console.log(
+  "%c-------------------------------------------------------",
+  "color: #007acc; font-weight: bold;"
+);
+console.log(
+  "👉 Status: %cSystem running smoothly...",
+  "color: #2a9d8f; font-weight: bold;"
+);
  
 
 })();
