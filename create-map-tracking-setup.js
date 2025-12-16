@@ -98,7 +98,7 @@ function download(url, dest) {
   const routePath = "src/app/app-routing.module.ts";
   let routeData = fs.readFileSync(routePath, "utf8");
 
-  if (!routeData.includes("map")) {
+ 
     routeData = routeData.replace(
       "const routes: Routes = [",
       `const routes: Routes = [
@@ -106,7 +106,7 @@ function download(url, dest) {
     );
     fs.writeFileSync(routePath, routeData);
     console.log("✔ Route added");
-  }
+  
 
 // -----------------------------------------------------------
 // 8️⃣ REPLACE 'tracker/' WITH 'map-tracking/' IN attendance.component.html
