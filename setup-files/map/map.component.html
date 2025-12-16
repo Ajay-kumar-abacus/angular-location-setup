@@ -1,295 +1,190 @@
 <div class="main-container" style="overflow:overlay">
   <div class="location-tracker-container">
 
-    <!-- Employee Info Card -->
-    <!-- Modern Employee Card Template -->
-    <div class="employee-card" *ngIf="!isLoading && !isSidebarVisible">
-      <div class="employee-header">
-        <div class="employee-avatar">
-          <i class="material-icons">person</i>
-        </div>
-
-        <div class="employee-details" *ngIf="employeeData">
-          <h3>{{ employeeData.name || 'Employee Name' }}</h3>
-          <p>
-            <span class="employee-meta-item">
-              <i class="material-icons" style="font-size: 14px;">badge</i>
-              {{ employeeData.employee_id || 'EMP001' }}
-            </span>
-            <span class="employee-meta-item">
-              <i class="material-icons" style="font-size: 14px;">phone</i>
-              {{ employeeData.contact_01 || '+91 XXXX XXX XXX' }}
-            </span>
-          </p>
-          <div class="user-selection">
-            <div class="dropdown-container">
-              <label for="dateSelect">Select Date</label>
-              <div class="header-actions">
-                <input type="date" id="dateSelect" [(ngModel)]="selectedDate" (change)="onDateChange()" [max]="maxDate"
-                  class="date-input-small">
-              </div>
+    <!-- Modern Dashboard Header -->
+    <div class="dashboard-header" *ngIf="!isLoading && !isSidebarVisible">
+      <!-- Unified Profile Card with Controls -->
+      <div class="profile-card-unified">
+        <!-- Left Section: Avatar + Info -->
+        <div class="profile-main" *ngIf="employeeData">
+          <div class="avatar-wrapper">
+            <div class="avatar">
+              <i class="material-icons">person</i>
             </div>
-
-           <div class="dropdown-container">
-  <label for="userSearch">Select Employee</label>
-
-  <div class="custom-dropdown" (click)="showList()">
-    <!-- Search box inside dropdown -->
-    <input
-      type="text"
-      id="userSearch"
-      placeholder="Search employee..."
-      [(ngModel)]="searchTerm"
-      (input)="loadUsersList()"
-      class="user-search"
-    />
-
-    <!-- Dropdown list -->
-    <ul class="dropdown-list" *ngIf="userList?.length && userListing">
-      <li 
-        *ngFor="let user of userList"
-        (click)="selectUser(user)"
-        [class.selected]="selectedUserId === user.id"
-      >
-        {{ user.name }} - {{ user.employee_id }}
-      </li>
-    </ul>
-
-    <!-- Loading indicator -->
-    <div class="loading-spinner-small" *ngIf="isLoadingUsers"></div>
-  </div>
-</div>
-
-
+            <div class="status-indicator" [class.online]="isToday()"></div>
+          </div>
+          <div class="profile-details">
+            <h2 class="employee-name">{{ employeeData.name || 'Employee Name' }}</h2>
+            <div class="employee-meta">
+              <span class="meta-chip">
+                <i class="material-icons">badge</i>
+                {{ employeeData.employee_id || 'EMP001' }}
+              </span>
+              <span class="meta-chip">
+                <i class="material-icons">phone</i>
+                {{ employeeData.contact_01 || '+91 XXXX XXX XXX' }}
+              </span>
+              <span class="meta-chip device" *ngIf="summarizeData?.device_model">
+                <i class="material-icons">phone_android</i> 
+                {{ summarizeData.device_model }}
+                <span *ngIf="summarizeData.android_version">{{summarizeData.android_version}}</span>
+                
+              </span>
+              <span class="meta-chip time" *ngIf="isToday() && summarizeData?.created_at">
+                <i class="material-icons">update</i>
+                {{ summarizeData.created_at | date:'shortTime' }}
+              </span>
+            </div>
           </div>
         </div>
-        <div class="kpi-grid" *ngIf="!isSidebarVisible && !isLoading && selectedUserId">
 
-
-
-          <div class="kpi-card">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">GPS Distance</span>
-                <span class="kpi-value">{{total_distance || 0}} KM</span>
-                <span class="kpi-subtitle">today</span>
-              </div>
-              <div class="kpi-icon kpi-icon-purple">
-                <i class="material-icons">route</i>
-              </div>
-            </div>
+        <!-- Center Section: Search & Date Controls -->
+        <div class="profile-controls">
+          <div class="input-group search-group" (click)="showList()">
+            <i class="material-icons">person_search</i>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="searchTerm" (input)="loadUsersList()">
+            <ul class="dropdown-results" *ngIf="userList?.length && userListing">
+              <li *ngFor="let user of userList" (click)="selectUser(user)" [class.selected]="selectedUserId === user.id">
+                <span class="name">{{ user.name }}</span>
+                <span class="id">{{ user.employee_id }}</span>
+              </li>
+            </ul>
+            <div class="spinner-mini" *ngIf="isLoadingUsers"></div>
           </div>
-            <div class="kpi-card clickable" (click)="showMeterDistance()">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">Meter Distance</span>
-                <span class="kpi-value">{{ getTotalDistance() }} KM</span>
-                <span class="kpi-subtitle clickable-subtitle">Click to view images</span>
-              </div>
-              <div class="kpi-icon kpi-icon-purple">
-                <i class="material-icons">route</i>
-              </div>
+          <div class="date-navigation">
+            <button class="date-nav-btn" (click)="navigateDate(-1)" title="Previous Day">
+              <i class="material-icons">chevron_left</i>
+            </button>
+            <div class="input-group date-group">
+              <i class="material-icons">event</i>
+              <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()" [max]="maxDate">
             </div>
+            <button class="date-nav-btn" (click)="navigateDate(1)" [disabled]="isToday()" title="Next Day">
+              <i class="material-icons">chevron_right</i>
+            </button>
           </div>
-          <div class="kpi-card clickable" (click)="showCheckinTimeline()">
-  <div class="kpi-content">
-    <div class="kpi-info">
-      <span class="kpi-label">Checkin Distance</span>
-      <span class="kpi-value">{{summaryTimelineCheckin?.total_direct_km || 0}} KM</span>
-      <span class="kpi-subtitle clickable-subtitle">Click to view timeline</span>
-    </div>
-    <div class="kpi-icon kpi-icon-purple">
-      <i class="material-icons">route</i>
-    </div>
-  </div>
-</div>
-
-          <div class="kpi-card">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">Active Time</span>
-                <span class="kpi-value">{{activeTime|| 0}}</span>
-                <span class="kpi-subtitle">today</span>
-              </div>
-              <div class="kpi-icon kpi-icon-purple">
-                <i class="material-icons">schedule</i>
-              </div>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">Battery</span>
-                <span class="kpi-value">{{summarizeData?.battery_level ? summarizeData.battery_level + '%' :
-                  '--'}}</span>
-                <span class="kpi-subtitle">across devices</span>
-              </div>
-             <div class="aurora-battery-section">
-              <div class="aurora-battery-visual">
-                <div class="aurora-battery-shell" [style.border-color]="getBatteryColor(summarizeData?.battery_level)">
-                  <div class="aurora-battery-core" 
-                       [style.height.%]="summarizeData?.battery_level"
-                       [style.background]="getBatteryColor(summarizeData?.battery_level)">                        
-                  </div>
-                 
-                  <div class="aurora-battery-tip" [style.background]="getBatteryColor(summarizeData?.battery_level)"></div>
-                </div>
-               
-              </div>
-            </div>
-            </div>
-          </div>
-           
-          <div class="kpi-card" (click)="showMissingPermissions()"
-            [style.cursor]="missingPermissionsCount > 0 ? 'pointer' : 'default'">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">Missing Permissions</span>
-                <span class="kpi-value">{{missingPermissionsCount}}</span>
-                <span class="kpi-subtitle " [ngClass]="missingPermissionsCount>0 ?'blinking-red':''">action
-                  needed</span>
-              </div>
-              <div class="kpi-icon kpi-icon-green">
-                <i class="material-icons">location_on</i>
-              </div>
-            </div>
-          </div>
-            <div class="kpi-card">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-label">Attendance Variation</span>
-                <span class="kpi-value">{{attendanceVariation|| 0}}</span>
-                <span class="kpi-subtitle">today</span>
-              </div>
-              <div class="kpi-icon kpi-icon-purple">
-                <i class="material-icons">schedule</i>
-              </div>
-            </div>
-          </div>
-
-          <ng-container *ngIf="showMoreKpis">
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">Total Calls (TC)</span>
-                  <span class="kpi-value">{{ TC || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-blue">
-                  <i class="material-icons">call</i>
-                </div>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">Productive Calls (PC)</span>
-                  <span class="kpi-value">{{ PC || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-green">
-                  <i class="material-icons">call_made</i>
-                </div>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">Secondary Sale</span>
-                  <span class="kpi-value">₹ {{ secondary_sale_amount || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-orange">
-                  <i class="material-icons">shopping_cart</i>
-                </div>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">New Counter TC</span>
-                  <span class="kpi-value">{{ New_counter_TC || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-teal">
-                  <i class="material-icons">add_call</i>
-                </div>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">New Counter PC</span>
-                  <span class="kpi-value">{{ New_counter_PC || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-lime">
-                  <i class="material-icons">add_shopping_cart</i>
-                </div>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">New counter Primary Value</span>
-                  <span class="kpi-value">₹ {{ counter_primary_Value || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-orange">
-                  <i class="material-icons">shopping_cart</i>
-                </div>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-content">
-                <div class="kpi-info">
-                  <span class="kpi-label">New counter Secondary Value</span>
-                  <span class="kpi-value">₹ {{ counter_secondary_Value || 0 }}</span>
-                  <span class="kpi-subtitle">today</span>
-                </div>
-                <div class="kpi-icon kpi-icon-orange">
-                  <i class="material-icons">shopping_cart</i>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-
-          <div class="kpi-card kpi-toggle-card" (click)="showMoreKpis = !showMoreKpis">
-            <div class="kpi-content">
-              <div class="kpi-info">
-                <span class="kpi-value">{{ showMoreKpis ? 'Show Less' : 'Show More' }}</span>
-              </div>
-              <div class="kpi-icon kpi-icon-blue">
-                <i class="material-icons">{{ showMoreKpis ? 'unfold_less' : 'unfold_more' }}</i>
-              </div>
-            </div>
-          </div>
-
-        
         </div>
 
-        
-
- 
+        <!-- Right Section: Quick Status -->
+        <div class="profile-status" *ngIf="selectedUserId">
+          <div class="status-badge" [class.warning]="missingPermissionsCount > 0" (click)="missingPermissionsCount > 0 && showMissingPermissions()">
+            <i class="material-icons">{{ missingPermissionsCount > 0 ? 'warning' : 'verified_user' }}</i>
+            <span>{{ missingPermissionsCount > 0 ? missingPermissionsCount + ' Issues' : 'OK' }}</span>
+          </div>
+          <div class="status-badge battery"
+               [class.low]="summarizeData?.battery_level < 20"
+               [class.medium]="summarizeData?.battery_level >= 20 && summarizeData?.battery_level < 50">
+            <i class="material-icons">{{ summarizeData?.battery_level < 20 ? 'battery_alert' : summarizeData?.battery_level < 50 ? 'battery_4_bar' : 'battery_full' }}</i>
+            <span>{{ summarizeData?.battery_level || '--' }}%</span>
+          </div>
+        </div>
       </div>
-       <div class="header-info" *ngIf="isToday()">
-              <span *ngIf="summarizeData.device_model">{{ summarizeData.device_model }} ( {{
-                summarizeData.android_version }})</span>
-              <span *ngIf="summarizeData.created_at">Last updated: {{ summarizeData.created_at | date:'medium' }}</span>
-            </div>
-             <div class="header-info" *ngIf="!isToday()">
-              <span *ngIf="summarizeData.device_model">{{ summarizeData.device_model }} (Android {{
-                summarizeData.android_version }})</span>
-            </div>
 
-      <!-- Modern Control Section -->
+      <!-- KPI Metrics Grid -->
+      <div class="metrics-container" *ngIf="!isSidebarVisible && !isLoading && selectedUserId && attendanceData">
+        <div class="metrics-grid">
+          <!-- Distance Metrics -->
+          <div class="metric-card">
+            <div class="metric-icon distance">
+              <i class="material-icons">route</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ total_distance || 0 }}<small>km</small></span>
+              <span class="metric-label">GPS Distance</span>
+            </div>
+          </div>
 
+          <div class="metric-card clickable" (click)="showMeterDistance()">
+            <div class="metric-icon meter">
+              <i class="material-icons">speed</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ getTotalDistance() }}<small>km</small></span>
+              <span class="metric-label">Meter Reading</span>
+            </div>
+            <i class="material-icons action-icon">arrow_forward</i>
+          </div>
+
+        
+
+          <div class="metric-card clickable" (click)="showCheckinTimeline()">
+            <div class="metric-icon checkin">
+              <i class="material-icons">pin_drop</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ summaryTimelineCheckin?.total_direct_km || 0 }}<small>km</small></span>
+              <span class="metric-label">Check-in Distance</span>
+            </div>
+            <i class="material-icons action-icon">arrow_forward</i>
+          </div>
+
+          <!-- Activity Metrics -->
+          <div class="metric-card">
+            <div class="metric-icon time">
+              <i class="material-icons">schedule</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ activeTime || '--' }}</span>
+              <span class="metric-label">Active Time</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon variation">
+              <i class="material-icons">trending_up</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ attendanceVariation || 0 }}</span>
+              <span class="metric-label">Attendance Var.</span>
+            </div>
+          </div>
+
+            <!-- Calls & Sales Toggle -->
+          <div class="metric-card expand-card" (click)="showMoreKpis = !showMoreKpis" [class.expanded]="showMoreKpis">
+            <div class="metric-icon more">
+              <i class="material-icons">{{ showMoreKpis ? 'remove' : 'add' }}</i>
+            </div>
+            <div class="metric-content">
+              <span class="metric-value">{{ TC || 0 }}/{{ PC || 0 }}</span>
+              <span class="metric-label">TC / PC</span>
+            </div>
+            <i class="material-icons expand-icon">{{ showMoreKpis ? 'expand_less' : 'expand_more' }}</i>
+          </div>
+        </div>
+
+        <!-- Expandable Sales Metrics -->
+        <div class="sales-metrics" *ngIf="showMoreKpis" [@slideDown]>
+          <div class="sales-grid">
+            <div class="sales-item">
+              <span class="sales-label">Secondary Sale</span>
+              <span class="sales-value">₹{{ secondary_sale_amount || 0 }}</span>
+            </div>
+            <div class="sales-item">
+              <span class="sales-label">New TC</span>
+              <span class="sales-value">{{ New_counter_TC || 0 }}</span>
+            </div>
+            <div class="sales-item">
+              <span class="sales-label">New PC</span>
+              <span class="sales-value">{{ New_counter_PC || 0 }}</span>
+            </div>
+            <div class="sales-item">
+              <span class="sales-label">Primary Value</span>
+              <span class="sales-value">₹{{ counter_primary_Value || 0 }}</span>
+            </div>
+            <div class="sales-item">
+              <span class="sales-label">Secondary Value</span>
+              <span class="sales-value">₹{{ counter_secondary_Value || 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Not Present Message -->
+      <div class="empty-state-container" *ngIf="!attendanceData && selectedUserId && !isLoading">
+        <i class="material-icons empty-state-icon">event_busy</i>
+        <h3 class="empty-state-title">User Was Not Present</h3>
+        <p class="empty-state-description">No attendance data is available for the selected day, so there are no metrics or tracking details to display.</p>
+      </div>
     </div>
 
 <!-- Checkin Timeline Alert Modal -->
@@ -312,6 +207,12 @@
         <div class="checkin-summary-item">
           <span class="summary-label">Shortest Distance</span>
           <span class="summary-value">{{summaryTimelineCheckin?.total_direct_km || 0}} KM</span>
+        </div>
+        <div class="checkin-summary-item route-action">
+          <button class="full-route-btn" (click)="openFullRouteOnGoogleMaps()" title="View full route on Google Maps">
+            <i class="material-icons">directions</i>
+            <span>View Full Route</span>
+          </button>
         </div>
          <!-- <div class="checkin-summary-item">
           <span class="summary-label">Check-in to Check-out</span>
@@ -378,6 +279,15 @@
               <i class="material-icons">location_on</i>
               <span>{{event.location.address}}</span>
             </div>
+
+            <div class="checkin-event-coords" *ngIf="event.location?.lat && event.location?.lng">
+              <i class="material-icons">my_location</i>
+              <span class="coords-text">{{event.location.lat}}, {{event.location.lng}}</span>
+             
+              <button class="route-btn" (click)="openGoogleMapsRoute(i)" title="Get route from previous point" *ngIf="event.type === 'checkin'">
+                <i class="material-icons">directions</i>
+              </button>
+            </div>
             
             <div class="checkin-event-distance" *ngIf="event.distance_from_previous">
               <div class="distance-badge">
@@ -432,28 +342,23 @@
       </div>
     </div>
 
-    <!-- Missing Permissions Disclaimer Modal -->
-    <div class="alert-overlay" *ngIf="showPermissionsDisclaimer">
-      <div class="alert-container">
-        <div class="alert-header" style="background-color: #ffc107;">
-          <div class="alert-icon" style="color: #212529;">
-            <svg width="24" height="24" viewBox="0 0 24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-              <path d="M12 9v4" />
-              <path d="m12 17.02.01 0" />
-            </svg>
-          </div>
-          <h3 class="alert-title" style="color: #212529;">Missing Permissions Disclaimer</h3>
-        </div>
-        <div class="alert-content">
-          <p class="alert-description">
-            Please note that routing and distance calculations may be affected due to missing permissions. Ensure all necessary permissions are granted for accurate tracking.
-          </p>
-        </div>
-        <div class="alert-actions">
-          <button class="btn-secondary" (click)="showPermissionsDisclaimer = false">Dismiss</button>
-        </div>
+    <!-- Missing Permissions Disclaimer Banner -->
+    <div class="top-warning-banner" *ngIf="showPermissionsDisclaimer">
+      <div class="warning-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <path d="M12 9v4" />
+          <path d="m12 17.02.01 0" />
+        </svg>
       </div>
+      <span class="warning-text">
+        <strong>Missing Permissions:</strong> Routing and distance calculations may be affected. Ensure all necessary permissions are granted for accurate tracking.
+      </span>
+      <button class="warning-dismiss" (click)="showPermissionsDisclaimer = false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Android Version Warning Modal -->
@@ -534,12 +439,38 @@
       </div>
     </div>
 
+    <!-- Select User Alert Modal -->
+    <div class="alert-overlay" *ngIf="showSelectUserAlert">
+      <div class="alert-container">
+        <div class="alert-header" style="background-color: #2196F3;">
+          <div class="alert-icon" style="color: white;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <h3 class="alert-title" style="color: white;">Select User First</h3>
+          <button class="alert-close" (click)="closeSelectUserAlert()" aria-label="Close alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
+        <div class="alert-content">
+          <p class="alert-description">
+            Please select a user from the search box above to view tracking details, route, timeline, and other information.
+          </p>
+        </div>
 
-
+        <div class="alert-actions">
+          <button class="btn-primary" (click)="closeSelectUserAlert()" style="background-color: #2196F3;">OK</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Tab Navigation && locationMarkers.length > 0-->
-    <div class="tab-navigation-wrapper" *ngIf="!isLoading ">
+    <div class="tab-navigation-wrapper" *ngIf="!isLoading && (attendanceData || isToday())">
       <div class="tab-controls">
         <div class="fullscreen-toggle">
           <span class="toggle-label">Full Screen</span>
@@ -595,99 +526,239 @@
   <i class="material-icons">security</i>
   <span>Missing Permissions</span>
 </button>
+        <!-- <button class="tab-button" [class.active]="activeTab === 'permissionreport'" (click)="switchTab('permissionreport')">
+  <i class="material-icons">verified_user</i>
+  <span>Permission Report</span>
+</button> -->
+        <button class="tab-button" [class.active]="activeTab === 'kmcalendar'" (click)="switchTab('kmcalendar')">
+  <i class="material-icons">calendar_month</i>
+  <span>KM Calendar</span>
+</button>
+        <button class="tab-button" [class.active]="activeTab === 'trackingguide'" (click)="switchTab('trackingguide')">
+  <i class="material-icons">help_outline</i>
+  <span>Tracking Guide</span>
+</button>
       </div>
     </div>
 
     <!-- Main Content Grid -->
-    <div class="main-content-grid" *ngIf="!isLoading">
+    <div class="main-content-grid" *ngIf="!isLoading && (attendanceData || (isToday() && activeTab === 'liveusers') || activeTab === 'trackingguide')">
 
 
       <!-- Main Map Area -->
       <main class="map-section"
-        *ngIf="activeTab !== 'permissions' && activeTab !== 'timeline' && activeTab !== 'battery' && activeTab !== 'summary' && activeTab !== 'health' && activeTab !== 'liveusers'">
-        <div class="map-container">
-          <div id="trackingMap" class="tracking-map" *ngIf="locationMarkers.length > 0"></div>
+        *ngIf="activeTab !== 'permissions' && activeTab !== 'permissionreport' && activeTab !== 'timeline' && activeTab !== 'battery' && activeTab !== 'summary' && activeTab !== 'health' && activeTab !== 'liveusers' && activeTab != 'kmcalendar' && activeTab != 'trackingguide'">
 
-          <!-- Map Controls Overlay -->
-          <div class="map-controls" style="z-index: 400;" *ngIf="oldFlag!=true">
-            <!-- <button class="map-control-btn">
-              <i class="material-icons">my_location</i>
-            </button>
-            <button class="map-control-btn">
-              <i class="material-icons">zoom_in</i>
-            </button>
-            <button class="map-control-btn">
-              <i class="material-icons">zoom_out</i>
-            </button>
-            <button class="map-control-btn">
-              <i class="material-icons">layers</i>
-            </button> -->
-            <div class="fullscreen-toggle snapToRoad" *ngIf="!isToday()">
-              <span class="toggle-label" style="font-size:20px;font-weight:700;">Snap To Road</span>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="snapToRoad" (change)="toggleRoadChange()">
-                <span class="slider"></span>
-              </label>
+        <!-- Top Control Bar (above map) -->
+        <div class="map-top-bar" *ngIf="oldFlag!=true && locationMarkers.length > 0">
+          <!-- Left: Employee Info -->
+          <div class="top-bar-left">
+            <div class="employee-info" *ngIf="isSidebarVisible">
+              <i class="material-icons">person</i>
+              <span class="emp-name">{{employeeData.name}}</span>
+              <span class="emp-date">{{selectedDate}}</span>
             </div>
-            <!-- Wrap your existing snippet with the class below -->
-            <div class="map-info-card" *ngIf="isSidebarVisible">
-              <div class="map-info-name">{{employeeData.name}}</div>
-              <div class="map-info-date">{{selectedDate}}</div>
-            </div>
-
           </div>
 
-          <!-- Playback Controls -->
-          <div class="playback-controls" style="z-index: 400;" *ngIf="activeTab === 'playback' && !isMapLoading">
-            <div class="playback-left">
-              <button class="control-btn play-btn" *ngIf="playbackStatus === 'paused' || playbackStatus === 'stopped'"
-                (click)="startPlayback()">
-                <i class="material-icons">play_arrow</i>
-              </button>
-              <button class="control-btn pause-btn" *ngIf="playbackStatus === 'playing'" (click)="pausePlayback()">
-                <i class="material-icons">pause</i>
-              </button>
-
-              <div class="playback-info">
-                <span class="playback-time">{{playbackDateTime}}</span>
-                <span class="playback-status">{{playbackStatus}}</span>
-              </div>
+          <!-- Center: Marker Toggles -->
+          <div class="top-bar-center" *ngIf="activeTab === 'route' || activeTab === 'playback'">
+            <div class="toggle-group">
+              <label class="toggle-pill" [class.active]="showCheckinMarkers">
+                <input type="checkbox" [(ngModel)]="showCheckinMarkers" (change)="toggleCheckinMarkersVisibility()">
+                <i class="material-icons">pin_drop</i>
+                <span>Check-ins</span>
+                <span class="count" *ngIf="checkin?.length">({{checkin.length}})</span>
+              </label>
+              <label class="toggle-pill hold" [class.active]="showHoldPointMarkers">
+                <input type="checkbox" [(ngModel)]="showHoldPointMarkers" (change)="toggleHoldPointMarkersVisibility()">
+                <i class="material-icons">pause_circle</i>
+                <span>Holds</span>
+                <span class="count" *ngIf="apiHoldPoints?.length">({{apiHoldPoints.length}})</span>
+              </label>
+              <label class="toggle-pill permission" [class.active]="showPermissionMarkers">
+                <input type="checkbox" [(ngModel)]="showPermissionMarkers" (change)="togglePermissionMarkersVisibility()">
+                <i class="material-icons">settings</i>
+                <span>Permissions</span>
+                <span class="count" *ngIf="apiPermissionChangeLocations?.length">({{apiPermissionChangeLocations.length}})</span>
+              </label>
             </div>
+          </div>
 
-            <div class="progress-section">
-              <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" (input)="updateProgress($event)"
-                class="progress-slider">
-            </div>
-
-            <div class="playback-right">
-              <div class="speed-controls">
-                <button class="speed-btn" (click)="toggleSpeedControl()">
-                  <i class="material-icons">speed</i>
-                  <span>{{ playbackDelay/1000 }}x</span>
-                </button>
-
-                <div class="speed-dropdown" *ngIf="showSpeedControl">
-                  <input type="range" min="300" max="5000" step="100" [ngModel]="playbackDelay"
-                    (change)="updateSpeed($event)" class="speed-slider">
-                  <div class="speed-labels">
-                    <span>0.3x</span>
-                    <span>5x</span>
-                  </div>
+          <!-- Right: Legend & Snap to Road -->
+          <div class="top-bar-right">
+            <!-- Legend Dropdown -->
+            <div class="legend-dropdown" *ngIf=" activeTab === 'playback'">
+              <button class="legend-btn" (click)="showLegendDropdown = !showLegendDropdown">
+                <i class="material-icons">info</i>
+                <span>Legend</span>
+                <i class="material-icons arrow">{{ showLegendDropdown ? 'expand_less' : 'expand_more' }}</i>
+              </button>
+              <div class="legend-menu" *ngIf="showLegendDropdown">
+                <div class="legend-item">
+                  <img src="./assets/location/start_point.png" alt="Start" class="legend-icon">
+                  <span>Start Point</span>
+                </div>
+                <div class="legend-item">
+                  <img src="./assets/location/end_point.png" alt="End" class="legend-icon">
+                  <span>End Point</span>
+                </div>
+                <div class="legend-item" *ngIf="activeTab === 'playback'">
+                  <img src="./assets/location/person.png" alt="Current" class="legend-icon">
+                  <span>Current Position</span>
+                </div>
+               
+                <div class="legend-item" *ngIf="apiHoldPoints?.length > 0">
+                  <i class="material-icons hold-icon">pause_circle</i>
+                  <span>Hold Point</span>
                 </div>
               </div>
             </div>
+             <div class="legend-dropdown" *ngIf="activeTab === 'route'">
+              <button class="legend-btn" (click)="showLegendDropdown = !showLegendDropdown">
+                <i class="material-icons">info</i>
+                <span>Legend</span>
+                <i class="material-icons arrow">{{ showLegendDropdown ? 'expand_less' : 'expand_more' }}</i>
+              </button>
+              <div class="legend-menu" *ngIf="showLegendDropdown">
+                <div class="legend-item">
+                  <img src="./assets/img/map-pin.png" alt="Start" class="legend-icon">
+                  <span>Start Point</span>
+                </div>
+                <div class="legend-item">
+                  <img src="./assets/img/person1.png" alt="End" class="legend-icon">
+                  <span>End Point</span>
+                </div>
+                <div class="legend-item">
+                  <img src="./assets/img/home-address.png" alt="Current" class="legend-icon">
+                  <span>Base Address</span>
+                </div>
+                <div class="legend-item" *ngIf="apiHoldPoints?.length > 0">
+                  <i class="material-icons hold-icon">pause_circle</i>
+                  <span>Hold Point</span>
+                </div>
+              </div>
+            </div>
+            <div class="legend-dropdown" *ngIf="activeTab === 'live'">
+              <button class="legend-btn" (click)="showLegendDropdown = !showLegendDropdown">
+                <i class="material-icons">info</i>
+                <span>Legend</span>
+                <i class="material-icons arrow">{{ showLegendDropdown ? 'expand_less' : 'expand_more' }}</i>
+              </button>
+              <div class="legend-menu" *ngIf="showLegendDropdown">
+                <div class="legend-item">
+                  <img src="./assets/img/map-pin.png" alt="Start" class="legend-icon">
+                  <span>Start Point</span>
+                </div>
+                <div class="legend-item">
+                  <img src="./assets/location/person.png" alt="End" class="legend-icon">
+                  <span>End Point</span>
+                </div>
+               
+                
+              </div>
+            </div>
 
+            <!-- Snap to Road -->
+            <label class="snap-toggle" *ngIf="!isToday() && activeTab === 'route'">
+              <input type="checkbox" [(ngModel)]="snapToRoad" (change)="toggleRoadChange()">
+              <span class="snap-label">Snap to Road</span>
+              <span class="snap-switch"></span>
+            </label>
           </div>
+        </div>
+
+        <div class="map-container" [class.playback-mode]="activeTab === 'playback'" [class.has-top-bar]="oldFlag!=true && locationMarkers.length > 0">
+          <div id="trackingMap" class="tracking-map" *ngIf="locationMarkers.length > 0"></div>
 
           <!-- Loading Overlay -->
           <div class="loading-overlay" *ngIf="isMapLoading">
             <!-- <div class="loading-spinner"></div> -->
-            <img style="height: 30%;" src="assets/locationIcon/finder.gif" />
+            <img style="height: 30%;" src="assets/img/finder.gif" />
             <p>Loading map data...</p>
           </div>
           <div class="loading-overlay" *ngIf="locationMarkers.length==0 && !isMapLoading">
-            <img style="height: 80%;" src="assets/locationIcon/noData.ico" />
+            <img style="height: 80%;" src="assets/img/noData.ico" />
             <p>No Data Found</p>
+          </div>
+
+          <!-- Enhanced Playback Controls - Overlay on Map -->
+          <div class="playback-overlay-controls" *ngIf="activeTab === 'playback' && !isMapLoading && locationMarkers.length > 0">
+        <!-- Top Stats Bar -->
+        <div class="playback-top-bar">
+          <div class="pb-stat-mini">
+            <i class="material-icons">straighten</i>
+            <span>{{ currentPlaybackDistance || '0' }} KM</span>
+          </div>
+          <div class="pb-stat-mini">
+            <i class="material-icons">route</i>
+            <span>{{ calculateTotalRouteDistance() }} KM</span>
+          </div>
+          <div class="pb-stat-mini">
+            <i class="material-icons">schedule</i>
+            <span>{{ playbackDateTime || '--:--' }}</span>
+          </div>
+          <div class="pb-stat-mini">
+            <i class="material-icons">pin_drop</i>
+            <span>{{ currentPlaybackIndex + 1 }}/{{ locationMarkers.length }}</span>
+          </div>
+          <div class="pb-stat-mini status" [class.playing]="playbackStatus === 'playing'" [class.paused]="playbackStatus === 'paused'">
+            <i class="material-icons">{{ playbackStatus === 'playing' ? 'fiber_manual_record' : playbackStatus === 'paused' ? 'pause_circle' : 'stop_circle' }}</i>
+            <span>{{ playbackStatus | titlecase }}</span>
+          </div>
+        </div>
+
+        <!-- Bottom Control Bar -->
+        <div class="playback-bottom-bar">
+          <!-- Main Controls -->
+          <div class="pb-main-controls">
+            <button class="pb-ctrl-btn" (click)="skipPlayback(-10)" title="Back 10 points">
+              <i class="material-icons">replay_10</i>
+            </button>
+            <button class="pb-ctrl-btn play" *ngIf="playbackStatus !== 'playing'" (click)="startPlayback()">
+              <i class="material-icons">play_arrow</i>
+            </button>
+            <button class="pb-ctrl-btn pause" *ngIf="playbackStatus === 'playing'" (click)="pausePlayback()">
+              <i class="material-icons">pause</i>
+            </button>
+            <button class="pb-ctrl-btn" (click)="skipPlayback(10)" title="Forward 10 points">
+              <i class="material-icons">forward_10</i>
+            </button>
+            <button class="pb-ctrl-btn stop" (click)="stopPlayback()" title="Stop & Reset">
+              <i class="material-icons">stop</i>
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="pb-progress-bar">
+            <span class="pb-time-label">{{ playbackStartTime || '00:00' }}</span>
+            <div class="pb-slider-track">
+              <div class="pb-slider-fill" [style.width.%]="playbackProgress"></div>
+              <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" (input)="updateProgress($event)">
+            </div>
+            <span class="pb-time-label">{{ playbackEndTime || '00:00' }}</span>
+          </div>
+
+          <!-- Speed & Options -->
+          <div class="pb-options">
+            <div class="pb-speed-btns">
+              <button [class.active]="playbackDelay === 2000" (click)="setPlaybackSpeed(2000)">0.5x</button>
+              <button [class.active]="playbackDelay === 1000" (click)="setPlaybackSpeed(1000)">1x</button>
+              <button [class.active]="playbackDelay === 500" (click)="setPlaybackSpeed(500)">2x</button>
+              <button [class.active]="playbackDelay === 200" (click)="setPlaybackSpeed(200)">5x</button>
+            </div>
+            <button class="pb-ctrl-btn small" [class.active]="followMarker" (click)="toggleFollowMarker()" title="Follow marker">
+              <i class="material-icons">{{ followMarker ? 'gps_fixed' : 'gps_not_fixed' }}</i>
+            </button>
+          </div>
+
+          <!-- API Hold Points Info (from backend) -->
+          <div class="pb-hold-info" *ngIf="apiHoldPoints?.length > 0">
+            <div class="hold-badge">
+              <i class="material-icons">pause_circle_filled</i>
+              <span>{{ apiHoldPoints.length }} Holds</span>
+            </div>
+          </div>
+        </div>
           </div>
         </div>
       </main>
@@ -937,80 +1008,200 @@
 
       <!-- Live Users Tracking Section -->
       <section class="live-users-section" *ngIf="activeTab === 'liveusers'">
+        <!-- Stats Header Bar -->
+        <div class="live-users-stats-bar">
+          <div class="stats-bar-item total">
+            <div class="stats-icon">
+              <i class="material-icons">groups</i>
+            </div>
+            <div class="stats-info">
+              <span class="stats-value">{{liveUsersData.length}}</span>
+              <span class="stats-label">Total Users</span>
+            </div>
+          </div>
+          <div class="stats-bar-item active">
+            <div class="stats-icon">
+              <i class="material-icons">directions_walk</i>
+            </div>
+            <div class="stats-info">
+              <span class="stats-value">{{getActiveUsersCount()}}</span>
+              <span class="stats-label">Moving</span>
+            </div>
+          </div>
+          <div class="stats-bar-item stationary">
+            <div class="stats-icon">
+              <i class="material-icons">person_pin_circle</i>
+            </div>
+            <div class="stats-info">
+              <span class="stats-value">{{liveUsersData.length - getActiveUsersCount()}}</span>
+              <span class="stats-label">Stationary</span>
+            </div>
+          </div>
+          <div class="stats-bar-item selected" *ngIf="selectedLiveUsers.size > 0">
+            <div class="stats-icon">
+              <i class="material-icons">check_circle</i>
+            </div>
+            <div class="stats-info">
+              <span class="stats-value">{{selectedLiveUsers.size}}</span>
+              <span class="stats-label">Selected</span>
+            </div>
+          </div>
+          <div class="stats-bar-actions">
+            <button class="stats-action-btn refresh" (click)="refreshLiveUsers()" [class.loading]="isLoadingLiveUsers">
+              <i class="material-icons" [class.spinning]="isLoadingLiveUsers">refresh</i>
+              <span>Refresh</span>
+            </button>
+            <button class="stats-action-btn clear" *ngIf="selectedLiveUsers.size > 0" (click)="clearAllSelections()">
+              <i class="material-icons">clear_all</i>
+              <span>Clear Selection</span>
+            </button>
+          </div>
+        </div>
+
         <div class="live-users-container">
+          <!-- Sidebar with Users List -->
           <div class="live-users-sidebar" [class.collapsed]="!showUsersList">
             <div class="sidebar-header">
-              <h3>Active Users</h3>
-              <div class="toggle-sidebar-btn">
-            
-                <strong style="background: aliceblue;padding:10px;
-                border-radius:10px;">{{liveUsersData.length}}</strong>
-              
-            </div> 
-            </div> 
-            
+              <div class="header-title">
+                <i class="material-icons">people_alt</i>
+                <h3>Team Members</h3>
+              </div>
+              <button class="collapse-btn" (click)="showUsersList = !showUsersList">
+                <i class="material-icons">{{showUsersList ? 'chevron_left' : 'chevron_right'}}</i>
+              </button>
+            </div>
 
+            <!-- Search Box -->
+            <div class="sidebar-search" *ngIf="showUsersList">
+              <i class="material-icons">search</i>
+              <input type="text" placeholder="Search users..." [(ngModel)]="liveUserSearchTerm" (input)="filterLiveUsers()">
+              <button class="clear-search" *ngIf="liveUserSearchTerm" (click)="liveUserSearchTerm = ''; filterLiveUsers()">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+
+            <!-- Users List -->
             <div class="users-list" *ngIf="showUsersList">
-              <div class="user-card" *ngFor="let user of liveUsersData"
-                [class.selected]="selectedLiveUsers.has(user.user.id.toString())"
-                (click)="toggleUserSelection(user.user.id.toString())">
-                <div class="user-avatar">
-                  <i class="material-icons">person</i>
-                  <span class="status-indicator" [class.active]="user.movement.is_moving"></span>
+              <div class="user-card" *ngFor="let user of filteredLiveUsersData"
+                [class.selected]="selectedLiveUsers.has(user.user_id?.toString() || user.user?.id?.toString())"
+                [class.moving]="user.is_moving === 1 || user.movement?.is_moving"
+                [class.offline]="user.is_online === false"
+                [class.stale]="user.is_stale"
+                (click)="toggleUserSelection(user.user_id?.toString() || user.user?.id?.toString()); focusOnUser(user)">
+
+                <div class="user-avatar" [class.moving]="user.is_moving === 1 || user.movement?.is_moving"
+                     [class.offline]="user.is_online === false">
+                  <span class="avatar-text">{{getInitials(user.name || user.user?.name)}}</span>
+                  <span class="status-dot" [class.active]="user.is_online !== false && (user.is_moving === 1 || user.movement?.is_moving)"
+                        [class.online]="user.is_online === true"
+                        [class.offline]="user.is_online === false"></span>
                 </div>
-                <div class="user-details">
-                  <h4>{{user.user.name || 'Unknown'}}</h4>
-                  <p class="user-id">ID: {{user.user.employee_id || 'N/A'}}</p>
-                  <div class="user-stats">
-                    <span class="stat-item">
-                      <i class="material-icons">battery_std</i>
-                      {{user.device.battery_level}}%
+
+                <div class="user-info">
+                  <div class="user-name-row">
+                    <h4 class="user-name">{{user.name || user.user?.name || 'Unknown'}}</h4>
+                    <span class="user-time" *ngIf="user.minutes_ago !== undefined">
+                      {{user.minutes_ago === 0 ? 'Just now' : user.minutes_ago + 'm ago'}}
                     </span>
-                   
-                  </div>
-                  <div class="user-activity">
-                    <span class="activity-badge" [class]="user.movement.activity">
-                      {{user.movement.activity || 'unknown'}}
+                    <span class="user-time" *ngIf="user.minutes_ago === undefined && user.updated_at">
+                      {{getTimeAgo(user.updated_at)}}
                     </span>
                   </div>
-                
+                  <p class="user-id">
+                    <i class="material-icons" style="font-size: 14px; vertical-align: middle;">phone</i>
+                    {{user.contact_01 || user.user?.employee_id || 'N/A'}}
+                  </p>
+
+                  <div class="user-meta">
+                    <span class="meta-item battery"
+                          [class.low]="(user.battery_level || user.device?.battery_level) < 20"
+                          [class.medium]="(user.battery_level || user.device?.battery_level) >= 20 && (user.battery_level || user.device?.battery_level) < 50">
+                      <i class="material-icons">{{getBatteryIcon(user.battery_level || user.device?.battery_level)}}</i>
+                      {{user.battery_level || user.device?.battery_level}}%
+                      <i class="material-icons" *ngIf="user.is_charging === 1" style="font-size: 12px; color: #22c55e;">bolt</i>
+                    </span>
+                    <span class="meta-item speed" *ngIf="(user.speed || user.movement?.speed) > 0">
+                      <i class="material-icons">speed</i>
+                      {{user.speed || user.movement?.speed}} km/h
+                    </span>
+                    <span class="meta-item accuracy" *ngIf="user.accuracy || user.location?.accuracy">
+                      <i class="material-icons">gps_fixed</i>
+                      {{(user.accuracy || user.location?.accuracy) | number:'1.0-0'}}m
+                    </span>
+                  </div>
+
+                  <div class="user-activity-row">
+                    <span class="activity-badge" [ngClass]="getActivityClass(user.activity_type || user.status || user.movement?.activity)">
+                      <i class="material-icons">{{getActivityIcon(user.activity_type || user.status || user.movement?.activity)}}</i>
+                      {{formatActivity(user.activity_type || user.status || user.movement?.activity)}}
+                    </span>
+                    <span class="online-status" [class.online]="user.is_online === true" [class.offline]="user.is_online === false">
+                      {{user.is_online === true ? 'Online' : 'Offline'}}
+                    </span>
+                  </div>
                 </div>
+
+                <div class="user-actions">
+                  <button class="action-btn locate" (click)="focusOnUser(user); $event.stopPropagation()" title="Locate on map">
+                    <i class="material-icons">my_location</i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div class="empty-users-state" *ngIf="filteredLiveUsersData.length === 0 && liveUserSearchTerm">
+                <i class="material-icons">search_off</i>
+                <p>No users match "{{liveUserSearchTerm}}"</p>
+              </div>
+
+              <div class="empty-users-state" *ngIf="liveUsersData.length === 0 && !isLoadingLiveUsers">
+                <i class="material-icons">people_outline</i>
+                <p>No active users found</p>
+                <button class="retry-btn" (click)="refreshLiveUsers()">
+                  <i class="material-icons">refresh</i>
+                  Try Again
+                </button>
               </div>
             </div>
 
-            <!-- <div class="sidebar-summary" *ngIf="showUsersList">
-              <div class="summary-item">
-                <span>Total Users:</span>
-                <strong>{{liveUsersData.length}}</strong>
+            <!-- Collapsed View -->
+            <div class="collapsed-icons" *ngIf="!showUsersList">
+              <div class="collapsed-count">
+                <span>{{liveUsersData.length}}</span>
+                <i class="material-icons">people</i>
               </div>
-              <div class="summary-item">
-                <span>Active:</span>
-                <strong>{{getActiveUsersCount()}}</strong>
-              </div>
-              <div class="summary-item">
-                <span>Selected:</span>
-                <strong>{{selectedLiveUsers.size}}</strong>
-              </div>
-            </div> -->
+            </div>
           </div>
 
+          <!-- Map Container -->
           <div class="live-users-map-container">
             <div id="liveUsersMap" class="live-users-map"></div>
 
-            <!-- Map Controls -->
-            <div class="live-map-controls-btn">
-             
-              <button class="control-btn-live" (click)="refreshLiveUsers()">
-                <i class="material-icons">refresh</i>
-                Refresh
-              </button>
-             
+            <!-- Map Legend -->
+            <div class="map-legend">
+              <div class="legend-title">Legend</div>
+              <div class="legend-item">
+                <span class="legend-dot moving"></span>
+                <span>Moving</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot stationary"></span>
+                <span>Stationary</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot idle"></span>
+                <span>Idle</span>
+              </div>
             </div>
 
             <!-- Loading State -->
             <div class="loading-overlay" *ngIf="isLoadingLiveUsers">
-              <div class="loading-spinner"></div>
-              <p>Loading live users data...</p>
+              <div class="modern-loader">
+                <div class="loader-circle"></div>
+                <div class="loader-circle"></div>
+                <div class="loader-circle"></div>
+              </div>
+              <p>Fetching live locations...</p>
             </div>
           </div>
         </div>
@@ -1030,18 +1221,8 @@
       <section class="timeline-section" *ngIf="activeTab === 'timeline'">
         <div class="timeline-container" *ngIf="timelineEvents.length > 0">
           <div class="timeline-header">
-            <h2>Daily Activity Timeline</h2>
-            <div class="timeline-stats">
-              <span class="stat-item">
-                <i class="material-icons">event</i>
-                {{timelineEvents.length}} Events
-              </span>
-             
-              <span class="stat-item">
-                <i class="material-icons">timer</i>
-                {{timelineData.analytics?.total_travel_time || 0}} mins
-              </span>
-            </div>
+            <h2>Daily Activity Timeline of {{employeeData.name}}</h2>
+            
             <!-- Map Toggle Button -->
             <button class="map-toggle-btn" (click)="toggleTimelineMap()" [class.active]="showTimelineMap">
               <i class="material-icons">{{showTimelineMap ? 'map' : 'view_list'}}</i>
@@ -1058,7 +1239,7 @@
             <!-- Timeline List (hidden when map is shown) -->
             <div class="timeline-track" *ngIf="!showTimelineMap">
               <div class="timeline-event" *ngFor="let event of timelineEvents; let i = index">
-                <div class="timeline-time">{{event.time}}</div>
+                <div class="timeline-time">{{formatTimeToAmPm(event.time)}}</div>
 
                 <div class="timeline-marker" [ngClass]="getTimelineEventClass(event.type)">
                   <i class="material-icons">{{getTimelineIcon(event.type)}}</i>
@@ -1071,6 +1252,13 @@
                   <div *ngIf="event.order_amount > 0" class="event-order-amount">
                     <i class="material-icons">shopping_cart</i>
                     <span>Order Amount: {{ event.order_amount | currency:'INR':'symbol':'1.2-2' }}</span>
+                  </div>
+ 
+                  <!-- Visit Time Details -->
+                  <div class="event-details" *ngIf="event.type === 'visit'">
+                    <span><i class="material-icons">login</i> In: {{formatTimeToAmPm(event.time)}}</span>
+                    <span *ngIf="event.end_time"><i class="material-icons">logout</i> Out: {{formatTimeToAmPm(event.end_time)}}</span>
+                    <span *ngIf="event.end_time" class="face-time"><i class="material-icons">timer</i> Face Time: {{calculateFaceTime(event.time, event.end_time)}}</span>
                   </div>
 
                   <div class="event-details" *ngIf="event.type === 'travel'">
@@ -1130,7 +1318,7 @@
         </div>
          <div class="timeline-container map-container" *ngIf="timelineEvents.length <=0">
       <div class="loading-overlay">
-            <img style="height: 80%;" src="assets/locationIcon/noData.ico" />
+            <img style="height: 80%;" src="assets/img/noData.ico" />
             <p>No Data Found</p>
           </div>
          </div>
@@ -1284,6 +1472,742 @@
   </div>
 </section>
 
+<!-- Permission Report Section (New) -->
+<section class="permission-report-section" *ngIf="activeTab === 'permissionreport'">
+  <div class="permission-report-container">
+    <!-- Header -->
+    <div class="permission-report-header">
+      <div class="header-left">
+        <h2><i class="material-icons">verified_user</i> Permission Status Report</h2>
+        <span class="report-date">{{selectedDate | date:'fullDate'}}</span>
+      </div>
+      <div class="header-right" *ngIf="permissionReportData">
+        <div class="health-score-badge" [ngClass]="permissionReportData.health_score >= 90 ? 'excellent' : permissionReportData.health_score >= 70 ? 'good' : permissionReportData.health_score >= 50 ? 'warning' : 'critical'">
+          <i class="material-icons">{{permissionReportData.health_score >= 90 ? 'verified' : permissionReportData.health_score >= 70 ? 'check_circle' : 'warning'}}</i>
+          <span class="score">{{permissionReportData.health_score | number:'1.0-0'}}%</span>
+          <span class="label">Health Score</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="permissionReportLoading">
+      <div class="spinner"></div>
+      <p>Loading permission report...</p>
+    </div>
+
+    <!-- Report Content -->
+    <div class="permission-report-content" *ngIf="!permissionReportLoading && permissionReportData">
+
+      <!-- Summary Cards -->
+      <div class="summary-cards-grid">
+        <div class="summary-card tracking">
+          <div class="card-icon"><i class="material-icons">schedule</i></div>
+          <div class="card-content">
+            <span class="card-value">{{permissionReportData.tracking_start | date:'HH:mm:ss'}} - {{permissionReportData.tracking_end | date:'HH:mm:ss'}}</span>
+            <span class="card-label">Tracking Period</span>
+          </div>
+        </div>
+        <div class="summary-card snapshots">
+          <div class="card-icon"><i class="material-icons">camera</i></div>
+          <div class="card-content">
+            <span class="card-value">{{permissionReportData.total_snapshots}}</span>
+            <span class="card-label">Total Snapshots</span>
+          </div>
+        </div>
+        <div class="summary-card changes">
+          <div class="card-icon"><i class="material-icons">swap_horiz</i></div>
+          <div class="card-content">
+            <span class="card-value">{{permissionReportData.total_changes}}</span>
+            <span class="card-label">Permission Changes</span>
+          </div>
+        </div>
+        <div class="summary-card duration">
+          <div class="card-icon"><i class="material-icons">timer</i></div>
+          <div class="card-content">
+            <span class="card-value">{{formatDuration(permissionReportData.total_tracking_seconds)}}</span>
+            <span class="card-label">Total Duration</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Status -->
+      <div class="current-status-section" *ngIf="permissionReportData.current_status">
+        <h3><i class="material-icons">info</i> Current Device Status</h3>
+        <div class="current-status-grid">
+          <div class="status-item" [class.enabled]="permissionReportData.current_status.fine_location" [class.disabled]="!permissionReportData.current_status.fine_location">
+            <i class="material-icons">my_location</i>
+            <span class="status-label">Fine Location</span>
+            <span class="status-value">{{permissionReportData.current_status.fine_location ? 'Enabled' : 'Disabled'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="permissionReportData.current_status.background_location" [class.disabled]="!permissionReportData.current_status.background_location">
+            <i class="material-icons">share_location</i>
+            <span class="status-label">Background Location</span>
+            <span class="status-value">{{permissionReportData.current_status.background_location ? 'Enabled' : 'Disabled'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="permissionReportData.current_status.gps_enabled" [class.disabled]="!permissionReportData.current_status.gps_enabled">
+            <i class="material-icons">gps_fixed</i>
+            <span class="status-label">GPS</span>
+            <span class="status-value">{{permissionReportData.current_status.gps_enabled ? 'Enabled' : 'Disabled'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="permissionReportData.current_status.location_enabled" [class.disabled]="!permissionReportData.current_status.location_enabled">
+            <i class="material-icons">location_on</i>
+            <span class="status-label">Location Service</span>
+            <span class="status-value">{{permissionReportData.current_status.location_enabled ? 'Enabled' : 'Disabled'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="permissionReportData.current_status.internet_on" [class.disabled]="!permissionReportData.current_status.internet_on">
+            <i class="material-icons">wifi</i>
+            <span class="status-label">Internet ({{permissionReportData.current_status.internet_type}})</span>
+            <span class="status-value">{{permissionReportData.current_status.internet_on ? 'Connected' : 'Disconnected'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="!permissionReportData.current_status.battery_optimized" [class.disabled]="permissionReportData.current_status.battery_optimized">
+            <i class="material-icons">battery_saver</i>
+            <span class="status-label">Battery Optimized</span>
+            <span class="status-value">{{permissionReportData.current_status.battery_optimized ? 'Yes' : 'No'}}</span>
+          </div>
+          <div class="status-item" [class.enabled]="!permissionReportData.current_status.power_save_mode" [class.disabled]="permissionReportData.current_status.power_save_mode">
+            <i class="material-icons">power_settings_new</i>
+            <span class="status-label">Power Save Mode</span>
+            <span class="status-value">{{permissionReportData.current_status.power_save_mode ? 'On' : 'Off'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions Detail Cards -->
+      <div class="permissions-detail-section">
+        <h3><i class="material-icons">security</i> Permission Details</h3>
+        <div class="permissions-cards-grid">
+          <div class="permission-card" *ngFor="let key of getPermissionKeys()"
+               [ngClass]="getPermissionStatusClass(permissionReportData.permissions[key])">
+            <div class="permission-card-header">
+              <i class="material-icons">{{getPermissionReportIcon(key)}}</i>
+              <span class="permission-name">{{permissionReportData.permissions[key].label}}</span>
+              <span class="change-count" *ngIf="permissionReportData.permissions[key].change_count > 0">
+                {{permissionReportData.permissions[key].change_count}} changes
+              </span>
+            </div>
+            <div class="permission-stats">
+              <div class="stat-row">
+                <div class="stat enabled">
+                  <span class="stat-value">{{permissionReportData.permissions[key].enabled_formatted}}</span>
+                  <span class="stat-label">Enabled</span>
+                </div>
+                <div class="stat disabled">
+                  <span class="stat-value">{{permissionReportData.permissions[key].disabled_formatted}}</span>
+                  <span class="stat-label">Disabled</span>
+                </div>
+              </div>
+              <div class="percentage-row">
+                <span class="enabled-pct">{{permissionReportData.permissions[key].enabled_percentage | number:'1.0-1'}}% Enabled</span>
+                <span class="disabled-pct">{{permissionReportData.permissions[key].disabled_percentage | number:'1.0-1'}}% Disabled</span>
+              </div>
+            </div>
+
+            <!-- Changes Timeline -->
+            <div class="permission-changes" *ngIf="permissionReportData.permissions[key].changes?.length > 0">
+              <h4>Status Changes</h4>
+              <div class="changes-timeline">
+                <div class="change-item" *ngFor="let change of permissionReportData.permissions[key].changes"
+                     [class.enabled]="change.action === 'enabled'" [class.disabled]="change.action === 'disabled'">
+                  <div class="change-time">{{change.time | date:'HH:mm:ss'}}</div>
+                  <div class="change-action">
+                    <i class="material-icons">{{change.action === 'enabled' ? 'toggle_on' : 'toggle_off'}}</i>
+                    <span>{{change.action | titlecase}}</span>
+                  </div>
+                  <div class="change-duration">after {{change.duration_formatted}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Section -->
+      <div class="timeline-section" *ngIf="permissionReportData.timeline?.length > 0">
+        <h3><i class="material-icons">timeline</i> Event Timeline</h3>
+        <div class="timeline-container">
+          <div class="timeline-event" *ngFor="let event of permissionReportData.timeline"
+               [class.snapshot]="event.type === 'snapshot'" [class.change]="event.type === 'change'">
+            <div class="event-time">{{event.time | date:'HH:mm:ss'}}</div>
+            <div class="event-marker">
+              <i class="material-icons">{{event.type === 'snapshot' ? 'camera_alt' : 'swap_horiz'}}</i>
+            </div>
+            <div class="event-content">
+              <ng-container *ngIf="event.type === 'snapshot'">
+                <span class="event-type">Device Snapshot</span>
+                <div class="snapshot-details">
+                  <span class="detail-chip" [class.on]="event.data.gps" [class.off]="!event.data.gps">
+                    GPS: {{event.data.gps ? 'On' : 'Off'}}
+                  </span>
+                  <span class="detail-chip" [class.on]="event.data.location" [class.off]="!event.data.location">
+                    Location: {{event.data.location ? 'On' : 'Off'}}
+                  </span>
+                  <span class="detail-chip" [class.on]="event.data.internet" [class.off]="!event.data.internet">
+                    Internet: {{event.data.internet ? 'On' : 'Off'}} ({{event.data.internet_type}})
+                  </span>
+                  <span class="detail-chip" [class.off]="event.data.battery_optimized" [class.on]="!event.data.battery_optimized">
+                    Battery Opt: {{event.data.battery_optimized ? 'On' : 'Off'}}
+                  </span>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="event.type === 'change'">
+                <span class="event-type change-event">Permission Changed</span>
+                <div class="change-details">
+                  <span class="permission-name">{{event.permission | titlecase}}</span>
+                  <span class="change-arrow">
+                    <i class="material-icons" [class.enabled]="event.old_status" [class.disabled]="!event.old_status">
+                      {{event.old_status ? 'check_circle' : 'cancel'}}
+                    </i>
+                    <i class="material-icons arrow">arrow_forward</i>
+                    <i class="material-icons" [class.enabled]="event.new_status" [class.disabled]="!event.new_status">
+                      {{event.new_status ? 'check_circle' : 'cancel'}}
+                    </i>
+                  </span>
+                  <span class="duration-note">(was {{formatDuration(event.duration_in_previous_state)}})</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <div class="no-data-state" *ngIf="!permissionReportLoading && !permissionReportData">
+      <i class="material-icons">verified_user</i>
+      <h3>No Permission Data Available</h3>
+      <p>No permission tracking data found for the selected date and user. Please select a different date or user.</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="!permissionReportLoading && permissionReportData?.statusCode !== 200">
+      <i class="material-icons">error_outline</i>
+      <h3>Unable to Load Report</h3>
+      <p>{{permissionReportData?.statusMsg || 'An error occurred while loading the permission report.'}}</p>
+    </div>
+  </div>
+</section>
+
+<!-- KM Calendar Section -->
+<section class="km-calendar-section" *ngIf="activeTab === 'kmcalendar'">
+  <div class="km-calendar-container">
+    <div class="km-calendar-header">
+      <h2>Monthly KM Tracking</h2>
+      <div class="km-calendar-controls">
+        <button class="month-nav-btn" (click)="navigateMonth(-1)">
+          <i class="material-icons">chevron_left</i>
+        </button>
+        <div class="month-year-display">
+          <select [(ngModel)]="selectedKmMonth" (change)="loadMonthlyKmData()" class="month-select">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+          <select [(ngModel)]="selectedKmYear" (change)="loadMonthlyKmData()" class="year-select">
+            <option *ngFor="let year of availableYears" [value]="year">{{year}}</option>
+          </select>
+        </div>
+        <button class="month-nav-btn" (click)="navigateMonth(1)" [disabled]="isCurrentMonth()">
+          <i class="material-icons">chevron_right</i>
+        </button>
+      </div>
+    </div>
+
+    <!-- KM Summary Cards -->
+    <div class="km-summary-cards" *ngIf="kmCalendarData?.summary">
+      <div class="km-summary-card total">
+        <div class="summary-icon">
+          <i class="material-icons">route</i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-value">{{kmCalendarData.summary.total_km}}<small>km</small></span>
+          <span class="summary-label">Total Distance</span>
+        </div>
+      </div>
+      <div class="km-summary-card days">
+        <div class="summary-icon">
+          <i class="material-icons">today</i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-value">{{kmCalendarData.summary.days_with_km}}</span>
+          <span class="summary-label">Days with KM</span>
+        </div>
+      </div>
+      <div class="km-summary-card average">
+        <div class="summary-icon">
+          <i class="material-icons">speed</i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-value">{{kmCalendarData.summary.average_km_per_day}}<small>km</small></span>
+          <span class="summary-label">Daily Average</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="km-calendar-grid" *ngIf="!isLoadingKmCalendar">
+      <!-- Day Headers -->
+      <div class="calendar-header-row">
+        <div class="calendar-header-cell">Sun</div>
+        <div class="calendar-header-cell">Mon</div>
+        <div class="calendar-header-cell">Tue</div>
+        <div class="calendar-header-cell">Wed</div>
+        <div class="calendar-header-cell">Thu</div>
+        <div class="calendar-header-cell">Fri</div>
+        <div class="calendar-header-cell">Sat</div>
+      </div>
+
+      <!-- Calendar Days -->
+      <div class="calendar-body">
+        <div class="calendar-week" *ngFor="let week of calendarWeeks">
+          <div class="calendar-day-cell"
+               *ngFor="let day of week"
+               [class.empty]="!day"
+               [class.has-km]="day?.km_per_day > 0"
+               [class.no-attendance]="day && !day.has_attendance"
+               [class.today]="day && isToday(day.date)"
+               [class.future]="day && isFutureDate(day.date)">
+            <ng-container *ngIf="day">
+              <!-- Day Header -->
+              <div class="day-header-row">
+                <div class="day-number">{{getDayNumber(day.date)}}</div>
+                <div class="day-name">{{day.day | slice:0:3}}</div>
+              </div>
+
+              <ng-container *ngIf="day.has_attendance">
+                <!-- Start/Stop Time -->
+                <div class="day-times" *ngIf="day.start_time || day.stop_time">
+                  <span class="start-time" *ngIf="day.start_time">
+                    <i class="material-icons">login</i>{{formatTimeToAmPm(day.start_time)}}
+                  </span>
+                  <span class="stop-time" *ngIf="day.stop_time">
+                    <i class="material-icons">logout</i>{{formatTimeToAmPm(day.stop_time)}}
+                  </span>
+                </div>
+
+                <!-- Meter Images -->
+                <div class="meter-images" *ngIf="day.start_meter_image || day.stop_meter_image">
+                  <div class="meter-img-wrapper" *ngIf="day.start_meter_image"
+                       (click)="goToImage(url + 'attendence/' + day.start_meter_image); $event.stopPropagation()">
+                    <img [src]="url + 'attendence/' + day.start_meter_image" alt="Start Meter">
+                    <span class="img-label start">Start</span>
+                  </div>
+                  <div class="meter-img-wrapper" *ngIf="day.stop_meter_image"
+                       (click)="goToImage(url + 'attendence/' + day.stop_meter_image); $event.stopPropagation()">
+                    <img [src]="url + 'attendence/' + day.stop_meter_image" alt="Stop Meter">
+                    <span class="img-label stop">Stop</span>
+                  </div>
+                </div>
+
+                <!-- Meter Readings -->
+                <div class="meter-readings" *ngIf="day.start_meter_reading || day.stop_meter_reading">
+                  <div class="reading-row">
+                    <span class="reading-label">Start:</span>
+                    <span class="reading-value">{{day.start_meter_reading || '--'}}</span>
+                  </div>
+                  <div class="reading-row">
+                    <span class="reading-label">Stop:</span>
+                    <span class="reading-value">{{day.stop_meter_reading || '--'}}</span>
+                  </div>
+                </div>
+
+                <!-- KM Comparison -->
+                <div class="km-comparison" *ngIf="day.km_per_day !== null || (day.start_meter_reading && day.stop_meter_reading)">
+                  <div class="km-row gps" *ngIf="day.km_per_day !== null">
+                    <i class="material-icons">gps_fixed</i>
+                    <span class="km-label">GPS:</span>
+                    <span class="km-val">{{day.km_per_day}} km</span>
+                  </div>
+                  <div class="km-row meter" *ngIf="day.start_meter_reading !== null && day.start_meter_reading !== undefined && day.stop_meter_reading !== null && day.stop_meter_reading !== undefined">
+                    <i class="material-icons">speed</i>
+                    <span class="km-label">Meter:</span>
+                    <span class="km-val" *ngIf="day.stop_meter_reading - day.start_meter_reading >= 0">{{day.stop_meter_reading - day.start_meter_reading}} km</span>
+                    <span class="km-val invalid" *ngIf="day.stop_meter_reading - day.start_meter_reading < 0">Invalid Meter Reading</span>
+                  </div>
+                  <!-- <div class="km-difference" *ngIf="day.km_per_day !== null && day.start_meter_reading !== null && day.start_meter_reading !== undefined && day.stop_meter_reading !== null && day.stop_meter_reading !== undefined && (day.stop_meter_reading - day.start_meter_reading) >= 0">
+                    <span class="diff-label">Diff:</span>
+                    <span class="diff-value"
+                          [class.positive]="(day.stop_meter_reading - day.start_meter_reading) - day.km_per_day > 0"
+                          [class.negative]="(day.stop_meter_reading - day.start_meter_reading) - day.km_per_day < 0">
+                      {{((day.stop_meter_reading - day.start_meter_reading) - day.km_per_day) > 0 ? '+' : ''}}{{((day.stop_meter_reading - day.start_meter_reading) - day.km_per_day) | number:'1.1-1'}} km
+                      <span class="diff-percent" *ngIf="day.km_per_day > 0">
+                        ({{((day.stop_meter_reading - day.start_meter_reading) - day.km_per_day) / day.km_per_day * 100 > 0 ? '+' : ''}}{{((day.stop_meter_reading - day.start_meter_reading) - day.km_per_day) / day.km_per_day * 100 | number:'1.1-1'}}%)
+                      </span>
+                    </span>
+                  </div> -->
+                </div>
+
+                <!-- View Map Button -->
+                <button class="view-map-btn" (click)="viewDayOnMap(day.date)">
+                  <i class="material-icons">map</i>
+                  View Map
+                </button>
+              </ng-container> 
+
+              <!-- Absent Indicator -->
+              <div class="absent-indicator" *ngIf="!day.has_attendance && !isFutureDate(day.date)">
+                <i class="material-icons">event_busy</i>
+                <span>Absent</span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="km-calendar-loading" *ngIf="isLoadingKmCalendar">
+      <div class="loading-spinner"></div>
+      <p>Loading KM data...</p>
+    </div>
+
+    <!-- No Data State -->
+    <div class="km-calendar-no-data" *ngIf="!isLoadingKmCalendar && (!kmCalendarData || !kmCalendarData.calendar_data || kmCalendarData.calendar_data.length === 0)">
+      <i class="material-icons">event_busy</i>
+      <h3>No KM Data Available</h3>
+      <p>No kilometer tracking data found for the selected month. Please select a different month or ensure the user has attendance records.</p>
+    </div>
+
+    <!-- Selected Day Details Modal -->
+    <div class="km-day-details-overlay" *ngIf="selectedKmDay" (click)="closeKmDayDetails()">
+      <div class="km-day-details-panel" (click)="$event.stopPropagation()">
+        <div class="km-day-details-header">
+          <h3>{{selectedKmDay.date | date:'fullDate'}}</h3>
+          <button class="close-btn" (click)="closeKmDayDetails()">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+        <div class="km-day-details-content">
+          <div class="detail-item">
+            <i class="material-icons">route</i>
+            <div class="detail-info">
+              <span class="detail-label">Distance Covered</span>
+              <span class="detail-value">{{selectedKmDay.km_per_day || 0}} km</span>
+            </div>
+          </div>
+          <div class="detail-item" *ngIf="selectedKmDay.start_time">
+            <i class="material-icons">login</i>
+            <div class="detail-info">
+              <span class="detail-label">Start Time</span>
+              <span class="detail-value">{{selectedKmDay.start_time}}</span>
+            </div>
+          </div>
+          <div class="detail-item" *ngIf="selectedKmDay.stop_time">
+            <i class="material-icons">logout</i>
+            <div class="detail-info">
+              <span class="detail-label">Stop Time</span>
+              <span class="detail-value">{{selectedKmDay.stop_time}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="km-day-details-actions">
+          <button class="btn-primary" (click)="viewDayOnMap(selectedKmDay.date)">
+            <i class="material-icons">map</i>
+            View on Map
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tracking Guide Section -->
+<section class="tracking-guide-section" *ngIf="activeTab === 'trackingguide'">
+  <div class="tracking-guide-container">
+    <div class="tracking-guide-header">
+      <h2><i class="material-icons">smartphone</i> Background Tracking Requirements</h2>
+      <p class="header-subtitle">Ensure these settings are configured correctly for accurate location tracking</p>
+    </div>
+
+    <div class="tracking-guide-grid">
+      <!-- Android 12 and Below Card -->
+      <div class="guide-card android-old">
+        <div class="card-header">
+          <div class="os-icon android">
+            <i class="material-icons">android</i>
+          </div>
+          <div class="os-info">
+            <h3>Android 12 and Below</h3>
+            <span class="os-badge warning">Stricter Conditions</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <!-- Not Recommended Warning -->
+          <div class="not-recommended-warning">
+            <div class="warning-icon">
+              <i class="material-icons">error</i>
+            </div>
+            <div class="warning-content">
+              <h4>Tracking Not Recommended</h4>
+              <p>Background tracking on Android 12 and below is <strong>unreliable</strong> and <strong>not recommended</strong>. Due to OS limitations, the device may or may not be tracked accurately. Tracking can stop unexpectedly at any time.</p>
+            </div>
+          </div>
+
+          <!-- Must Be Enabled Section -->
+          <div class="requirements-section enabled">
+            <div class="section-header">
+              <i class="material-icons">check_circle</i>
+              <h4>Must Be Enabled</h4>
+            </div>
+            <ul class="requirements-list">
+              <li>
+                <div class="req-icon success"><i class="material-icons">location_on</i></div>
+                <div class="req-content">
+                  <span class="req-title">Location Permission</span>
+                  <span class="req-value">"Allow all the time"</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">gps_fixed</i></div>
+                <div class="req-content">
+                  <span class="req-title">GPS / Location Service</span>
+                  <span class="req-value">ON</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">wifi</i></div>
+                <div class="req-content">
+                  <span class="req-title">Internet Connection</span>
+                  <span class="req-value">ON</span>
+                  <span class="req-note">Mobile data or Wi-Fi needed to send data</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">apps</i></div>
+                <div class="req-content">
+                  <span class="req-title">App Must Stay in Recent Apps</span>
+                  <span class="req-value">Do NOT close from recent view</span>
+                  <span class="req-note warning">If user swipes away the app → tracking stops</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Must Be Turned OFF Section -->
+          <div class="requirements-section disabled">
+            <div class="section-header">
+              <i class="material-icons">cancel</i>
+              <h4>Must Be Turned OFF</h4>
+            </div>
+            <ul class="requirements-list">
+              <li>
+                <div class="req-icon danger"><i class="material-icons">battery_saver</i></div>
+                <div class="req-content">
+                  <span class="req-title">Battery Saver Mode</span>
+                  <span class="req-value off">OFF</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon danger"><i class="material-icons">battery_alert</i></div>
+                <div class="req-content">
+                  <span class="req-title">Battery Optimization</span>
+                  <span class="req-value off">DISABLED for your app</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon danger"><i class="material-icons">power_settings_new</i></div>
+                <div class="req-content">
+                  <span class="req-title">Power Saving Mode</span>
+                  <span class="req-value off">OFF</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon danger"><i class="material-icons">block</i></div>
+                <div class="req-content">
+                  <span class="req-title">Restricted Background Activity</span>
+                  <span class="req-value off">OFF</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android 13+ Card -->
+      <div class="guide-card android-new">
+        <div class="card-header">
+          <div class="os-icon android">
+            <i class="material-icons">android</i>
+          </div>
+          <div class="os-info">
+            <h3>Android 13+</h3>
+            <span class="os-badge success">More Stable</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="requirements-section enabled">
+            <div class="section-header">
+              <i class="material-icons">recommend</i>
+              <h4>Recommended Settings</h4>
+            </div>
+            <ul class="requirements-list">
+              <li>
+                <div class="req-icon success"><i class="material-icons">location_on</i></div>
+                <div class="req-content">
+                  <span class="req-title">Location Permission</span>
+                  <span class="req-value">"Allow all the time"</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">battery_std</i></div>
+                <div class="req-content">
+                  <span class="req-title">Battery Optimization</span>
+                  <span class="req-value">Off for your app</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">power_off</i></div>
+                <div class="req-content">
+                  <span class="req-title">Power Saver</span>
+                  <span class="req-value">Off</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">apps</i></div>
+                <div class="req-content">
+                  <span class="req-title">App in Recents</span>
+                  <span class="req-value">Keep app in recent apps for best accuracy</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">wifi</i></div>
+                <div class="req-content">
+                  <span class="req-title">Internet</span>
+                  <span class="req-value">ON</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- OEM Warning -->
+          <div class="oem-warning">
+            <div class="warning-header">
+              <i class="material-icons">warning</i>
+              <h4>OEM-Specific Issues</h4>
+            </div>
+            <p>Tracking may reduce accuracy if OEM uses aggressive app killing:</p>
+            <div class="oem-brands">
+              <span class="oem-chip xiaomi">Xiaomi</span>
+              <span class="oem-chip oppo">Oppo</span>
+              <span class="oem-chip vivo">Vivo</span>
+              <span class="oem-chip realme">Realme</span>
+            </div>
+            <p class="oem-note">These devices require manual background permission configuration in device settings.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- iPhone Card -->
+      <div class="guide-card iphone">
+        <div class="card-header">
+          <div class="os-icon ios">
+            <i class="material-icons">phone_iphone</i>
+          </div>
+          <div class="os-info">
+            <h3>iPhone (iOS)</h3>
+            <span class="os-badge info">Special Rules</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="requirements-section enabled">
+            <div class="section-header">
+              <i class="material-icons">priority_high</i>
+              <h4>Mandatory Requirements</h4>
+            </div>
+            <ul class="requirements-list">
+              <li>
+                <div class="req-icon success"><i class="material-icons">location_on</i></div>
+                <div class="req-content">
+                  <span class="req-title">Location Permission</span>
+                  <span class="req-value">Always Allow</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">my_location</i></div>
+                <div class="req-content">
+                  <span class="req-title">Precise Location</span>
+                  <span class="req-value">ON</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">sync</i></div>
+                <div class="req-content">
+                  <span class="req-title">Background App Refresh</span>
+                  <span class="req-value">ON</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">wifi</i></div>
+                <div class="req-content">
+                  <span class="req-title">Internet</span>
+                  <span class="req-value">ON</span>
+                </div>
+              </li>
+              <li>
+                <div class="req-icon success"><i class="material-icons">apps</i></div>
+                <div class="req-content">
+                  <span class="req-title">App in Recent Apps</span>
+                  <span class="req-value">MUST remain in recent apps</span>
+                  <span class="req-note warning">If user swipes up and removes → tracking stops completely</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- iOS Important Note -->
+          <div class="ios-important-note">
+            <div class="note-icon">
+              <i class="material-icons">info</i>
+            </div>
+            <div class="note-content">
+              <h4>Important</h4>
+              <ul>
+                <li>iPhone automatically pauses GPS when the app is fully killed.</li>
+                <li>To maintain continuous tracking: app should remain open in background (recent apps).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Tips Section -->
+    <div class="quick-tips-section">
+      <h3><i class="material-icons">tips_and_updates</i> Quick Tips for Best Tracking</h3>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <i class="material-icons">location_on</i>
+          <span>Always grant "Allow all the time" location permission</span>
+        </div>
+        <div class="tip-card">
+          <i class="material-icons">battery_charging_full</i>
+          <span>Disable all battery optimization for the tracking app</span>
+        </div>
+        <div class="tip-card">
+          <i class="material-icons">signal_cellular_alt</i>
+          <span>Ensure stable internet connection (Wi-Fi or Mobile Data)</span>
+        </div>
+        <div class="tip-card">
+          <i class="material-icons">do_not_disturb_off</i>
+          <span>Never force-close the app from recent apps</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
     </div>
 
     <!-- Loading State -->
@@ -1296,5 +2220,4 @@
       </div>
     </div>
   </div>
-
 </div>
